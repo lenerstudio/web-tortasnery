@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background: Very light cream/white */
+    --background: 30 50% 98%;
+    /* Foreground: Dark Burgundy for text (Derived from #9E3B3B but darker for readability) */
+    --foreground: 0 46% 25%;
+
+    /* Card: White or very light pink */
+    --card: 0 0% 100%;
+    --card-foreground: 0 46% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 46% 25%;
+
+    /* Primary: #FDA1C0 (Pink) -> 339 94% 81% */
+    --primary: 339 94% 81%;
+    --primary-foreground: 0 46% 30%;
+    /* Dark Burgundy on Pink */
+
+    /* Secondary: #FFEAD3 (Cream) -> 31 100% 91% */
+    --secondary: 31 100% 91%;
+    --secondary-foreground: 0 46% 30%;
+
+    /* Accent: #EA7B7B (Salmon) -> 0 69% 70% */
+    --accent: 0 69% 70%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 57% 57%;
+    /* #D25353 */
+    --destructive-foreground: 0 0% 100%;
+
+    /* Muted */
+    --muted: 31 50% 96%;
+    --muted-foreground: 0 40% 50%;
+
+    /* Borders */
+    --border: 339 30% 90%;
+    --input: 339 30% 90%;
+    --ring: 339 94% 81%;
+
+    --radius: 0.75rem;
+    /* More rounded for elegance */
+  }
+
+  .dark {
+    /* Just in case, but we focus on light mode for this aesthetic */
+    --background: 0 46% 10%;
+    --foreground: 31 100% 91%;
+
+    --card: 0 46% 12%;
+    --card-foreground: 31 100% 91%;
+
+    --primary: 339 94% 81%;
+    --primary-foreground: 0 46% 20%;
+
+    --secondary: 0 46% 20%;
+    --secondary-foreground: 31 100% 91%;
+
+    --accent: 0 69% 70%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 0 46% 20%;
+    --input: 0 46% 20%;
+    --ring: 339 94% 81%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans font-light;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif tracking-tight font-medium;
+  }
+}
