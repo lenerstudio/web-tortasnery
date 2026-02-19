@@ -188,6 +188,19 @@ export function Navbar() {
                         )}
                     </Link>
 
+                    {/* Acceso rápido a perfil/login en móvil */}
+                    {user ? (
+                        <Link href="/mis-pedidos" className="flex items-center justify-center">
+                            <div className="bg-primary/20 h-8 w-8 rounded-full flex items-center justify-center font-bold text-primary text-xs border border-primary/20">
+                                {user.name.charAt(0)}
+                            </div>
+                        </Link>
+                    ) : (
+                        <Link href="/login" className="text-foreground hover:text-primary transition-colors">
+                            <User className="h-6 w-6" />
+                        </Link>
+                    )}
+
                     <Sheet open={isOpen} onOpenChange={setIsOpen}>
                         <SheetTrigger asChild>
                             <Button variant="ghost" size="icon">
