@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { Menu, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import Image from "next/image"
 import { useCart } from "@/context/cart-context"
 import { motion, AnimatePresence } from "framer-motion"
@@ -89,6 +89,10 @@ export function Navbar() {
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                            <SheetHeader>
+                                <SheetTitle className="text-left font-serif font-bold text-2xl">Menú</SheetTitle>
+                                <SheetDescription className="sr-only">Navegación principal</SheetDescription>
+                            </SheetHeader>
                             <nav className="flex flex-col gap-4 mt-8">
                                 {navigation.map((item) => (
                                     <Link
