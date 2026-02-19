@@ -18,6 +18,7 @@ export default function CheckoutPage() {
     const { cartTotal, items, clearCart } = useCart()
     const [loading, setLoading] = useState(false)
     const [completed, setCompleted] = useState(false)
+    const [emailError, setEmailError] = useState(false)
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -49,9 +50,14 @@ export default function CheckoutPage() {
 
         // Send Email (Server Action)
         try {
-            await sendOrderEmail(formData, items, cartTotal, newOrderNumber.toString())
+            const result = await sendOrderEmail(formData, items, cartTotal, newOrderNumber.toString())
+            if (!result.success) {
+                console.error("Fallo en el envío de email:", result.error)
+                setEmailError(true)
+            }
         } catch (error) {
-            console.error("Error al enviar el email:", error)
+            console.error("Error crítico al llamar server action:", error)
+            setEmailError(true)
         }
 
         setLoading(false)
@@ -72,11 +78,20 @@ export default function CheckoutPage() {
 
                 <div className="space-y-4 max-w-lg mx-auto">
                     <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground">¡Pedido Recibido!</h1>
-                    <p className="text-lg text-muted-foreground font-light leading-relaxed">
-                        Hemos enviado la confirmación a <strong>{formData.email}</strong>.
-                        <br />
-                        Para agilizar tu atención, por favor envíanos el detalle de tu pedido por WhatsApp.
-                    </p>
+
+                    {emailError ? (
+                        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-xl text-sm">
+                            <p className="font-bold">Nota Importante:</p>
+                            <p>No pudimos enviar el correo de confirmación automáticamente (posiblemente por configuración del servidor).</p>
+                            <p className="mt-2 font-semibold">¡No te preocupes! Tu pedido está seguro. Simplemente envíanos los detalles por WhatsApp a continuación.</p>
+                        </div>
+                    ) : (
+                        <p className="text-lg text-muted-foreground font-light leading-relaxed">
+                            Hemos enviado la confirmación a <strong>{formData.email}</strong>.
+                            <br />
+                            Para agilizar tu atención, por favor envíanos el detalle de tu pedido por WhatsApp.
+                        </p>
+                    )}
                 </div>
 
                 <div className="bg-secondary/5 p-6 rounded-2xl border border-secondary/20 max-w-sm mx-auto w-full mb-4">
