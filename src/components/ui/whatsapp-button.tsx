@@ -4,12 +4,29 @@ import { MessageCircle } from "lucide-react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
+import { getStoreSettings } from "@/app/admin/actions"
 
 export function WhatsAppButton() {
     const [show, setShow] = useState(false)
+    const [phone, setPhone] = useState("51997935991")
 
     useEffect(() => {
         const timer = setTimeout(() => setShow(true), 2000)
+
+        async function loadPhone() {
+            const res = await getStoreSettings()
+            if (res.success && res.data && res.data.contact_phone) {
+                // Remove spaces and non-digits
+                let cleanPhone = res.data.contact_phone.replace(/\D/g, '')
+                // If it doesn't start with 51 and is 9 digits, add 51
+                if (cleanPhone.length === 9 && !cleanPhone.startsWith('51')) {
+                    cleanPhone = '51' + cleanPhone
+                }
+                setPhone(cleanPhone)
+            }
+        }
+        loadPhone()
+
         return () => clearTimeout(timer)
     }, [])
 
@@ -23,7 +40,7 @@ export function WhatsAppButton() {
                     className="fixed bottom-6 right-6 z-50"
                 >
                     <Link
-                        href="https://wa.me/51997935991?text=Hola%20Tortas%20Nery,%20estoy%20interesada%20en%20una%20torta%20para%20mi%20boda/evento."
+                        href={`https://wa.me/${phone}?text=Hola%20Tortas%20Nery,%20estoy%20interesada%20en%20una%20torta%20para%20mi%20boda/evento.`}
                         target="_blank"
                         className="flex items-center justify-center w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg shadow-green-500/30 transition-all hover:scale-110 group relative"
                         aria-label="Contactar por WhatsApp"

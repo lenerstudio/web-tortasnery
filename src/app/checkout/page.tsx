@@ -5,20 +5,24 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { Loader2, ArrowLeft, CheckCircle2, Send, MessageCircle } from "lucide-react"
+import { Loader2, ArrowLeft, CheckCircle2, Send, MessageCircle, User } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Navbar } from "@/components/sections/navbar"
 import { Footer } from "@/components/sections/footer"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import { sendOrderEmail } from "@/app/actions"
+import { createFullOrder, getStoreSettings, getAdminSession } from "@/app/admin/actions"
 
 export default function CheckoutPage() {
     const { cartTotal, items, clearCart } = useCart()
     const [loading, setLoading] = useState(false)
     const [completed, setCompleted] = useState(false)
     const [emailError, setEmailError] = useState(false)
+    const [businessPhone, setBusinessPhone] = useState("51997935991")
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -29,6 +33,36 @@ export default function CheckoutPage() {
         address: "",
         notes: ""
     })
+    const [user, setUser] = useState<any>(null)
+    const router = useRouter()
+
+    useEffect(() => {
+        async function loadSettings() {
+            const res = await getStoreSettings()
+            if (res.success && res.data && res.data.contact_phone) {
+                let cleanPhone = res.data.contact_phone.replace(/\D/g, '')
+                if (cleanPhone.length === 9 && !cleanPhone.startsWith('51')) {
+                    cleanPhone = '51' + cleanPhone
+                }
+                setBusinessPhone(cleanPhone)
+            }
+        }
+        async function loadUser() {
+            const session = await getAdminSession()
+            if (session) {
+                setUser(session)
+                const nameParts = (session.name as string).split(" ")
+                setFormData(prev => ({
+                    ...prev,
+                    firstName: nameParts[0] || "",
+                    lastName: nameParts.slice(1).join(" ") || "",
+                    email: session.email as string
+                }))
+            }
+        }
+        loadSettings()
+        loadUser()
+    }, [])
     const [orderNumber, setOrderNumber] = useState<string>("")
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -39,6 +73,13 @@ export default function CheckoutPage() {
 
     const handleCheckout = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (!user) {
+            toast.error("Debes iniciar sesión para confirmar tu pedido")
+            router.push("/login?redirect=/checkout")
+            return
+        }
+
         setLoading(true)
 
         // Generate Order Number
@@ -48,15 +89,20 @@ export default function CheckoutPage() {
         // Snapshot cart for success screen
         setOrderSnapshot({ items: [...items], total: cartTotal })
 
-        // Send Email (Server Action)
+        // Send Email & Save to DB
         try {
-            const result = await sendOrderEmail(formData, items, cartTotal, newOrderNumber.toString())
+            // Using the unified server action that saves to DB and sends email
+            const result = await createFullOrder(formData, items, cartTotal, newOrderNumber.toString())
+
             if (!result.success) {
-                console.error("Fallo en el envío de email:", result.error)
+                console.error("Error al procesar pedido:", result.error)
+                // If it failed, we still want to show success screen but maybe with warning?
+                // Or if it was just DB error but not email? 
+                // Our createFullOrder tries both. If DB fails, it returns false.
                 setEmailError(true)
             }
         } catch (error) {
-            console.error("Error crítico al llamar server action:", error)
+            console.error("Error crítico:", error)
             setEmailError(true)
         }
 
@@ -68,7 +114,7 @@ export default function CheckoutPage() {
     if (completed && orderSnapshot) {
         const message = `Hola Tortas Nery, soy *${formData.firstName} ${formData.lastName}*.\n\nHe realizado el pedido *#${orderNumber}* por un total de *S/ ${orderSnapshot.total}*.\n\n*Detalles del Pedido:*\n${orderSnapshot.items.map(item => `- ${item.name} (x${item.quantity})`).join('\n')}\n\n*Fecha del Evento:* ${formData.date} a las ${formData.time}\n*Envío a:* ${formData.address}\n*Notas:* ${formData.notes || "Ninguna"}\n*Email:* ${formData.email}`
         const encodedMessage = encodeURIComponent(message)
-        const whatsappUrl = `https://wa.me/51997935991?text=${encodedMessage}`
+        const whatsappUrl = `https://wa.me/${businessPhone}?text=${encodedMessage}`
 
         return (
             <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 text-center space-y-8 animate-fade-in-up">
@@ -135,7 +181,14 @@ export default function CheckoutPage() {
 
                             {/* Customer Info */}
                             <div className="space-y-6">
-                                <h2 className="text-2xl font-serif font-bold border-b border-border/40 pb-4 text-foreground">1. Datos Personales</h2>
+                                <div className="flex items-center justify-between border-b border-border/40 pb-4">
+                                    <h2 className="text-2xl font-serif font-bold text-foreground">1. Datos Personales</h2>
+                                    {!formData.email && (
+                                        <Link href="/login?redirect=/checkout" className="text-xs text-primary font-bold hover:underline flex items-center gap-1">
+                                            <User className="w-3 h-3" /> ¿Ya tienes cuenta? Inicia sesión
+                                        </Link>
+                                    )}
+                                </div>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="firstName" className="text-sm font-light uppercase tracking-wider text-muted-foreground">Nombre</Label>

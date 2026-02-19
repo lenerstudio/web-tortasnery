@@ -5,67 +5,65 @@ import { ShoppingCart, Star, Check } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { useCart } from "@/context/cart-context"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import { getFeaturedProducts } from "@/app/actions"
 
-const products = [
+const staticProducts = [
     {
         id: 1,
         name: "Wedding Classic",
         price: 85,
         rating: 5,
-        image: "/img/maqueta-matrimonio-1.jpg",
-        desc: "3 pisos de elegancia pura con flores de azúcar hechas a mano."
+        image_url: "/img/maqueta-matrimonio-1.jpg",
+        description: "3 pisos de elegancia pura con flores de azúcar hechas a mano."
     },
     {
         id: 2,
         name: "Floral Vintage XV",
         price: 65,
         rating: 5,
-        image: "/img/maqueta-matrimonio-2.jpg",
-        desc: "Tonos pastel y acabados rústicos para una celebración soñada."
+        image_url: "/img/maqueta-matrimonio-2.jpg",
+        description: "Tonos pastel y acabados rústicos para una celebración soñada."
     },
     {
         id: 3,
         name: "Semi-Naked Berries",
         price: 45,
         rating: 4.8,
-        image: "/img/maqueta-matrimonio-3.jpg",
-        desc: "Frescura natural con frutos del bosque y crema de mantequilla ligera."
-    },
-    {
-        id: 4,
-        name: "Golden Glamour",
-        price: 90,
-        rating: 5,
-        image: "/img/maqueta-matrimonio-4.jpg",
-        desc: "Detalles en pan de oro de 24k y estructura moderna geométrica."
-    },
-    {
-        id: 5,
-        name: "Rose Garden",
-        price: 58,
-        rating: 4.9,
-        image: "/img/maqueta-matrimonio-5.jpg",
-        desc: "Jardín de rosas comestibles en cascada sobre fondant de seda."
-    },
-    {
-        id: 6,
-        name: "Petite Wedding",
-        price: 40,
-        rating: 5,
-        image: "/img/maqueta-matrimonio-6.jpg",
-        desc: "Perfecta para bodas civiles íntimas. Diseño minimalista y sabor intenso."
+        image_url: "/img/maqueta-matrimonio-3.jpg",
+        description: "Frescura natural con frutos del bosque y crema de mantequilla ligera."
     }
 ]
 
 export function BestSellers() {
     const { addItem } = useCart()
-    // Track which product was just added to show visual feedback
+    const [products, setProducts] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
     const [addedId, setAddedId] = useState<number | null>(null)
 
+    useEffect(() => {
+        async function loadData() {
+            setLoading(true)
+            const res: any = await getFeaturedProducts()
+            if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+                setProducts(res.data)
+            } else {
+                setProducts(staticProducts)
+            }
+            setLoading(false)
+        }
+        loadData()
+    }, [])
+
     const handleAddToCart = (product: any) => {
-        addItem(product)
+        addItem({
+            id: product.id,
+            name: product.name,
+            price: Number(product.price),
+            image: product.image_url || "/img/logo.jpg",
+            desc: product.description || ""
+        })
         setAddedId(product.id)
         setTimeout(() => setAddedId(null), 1500)
     }
@@ -102,13 +100,13 @@ export function BestSellers() {
                                 <Card className="h-full border-0 bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col rounded-[2rem]">
                                     <CardHeader className="p-0 relative aspect-[4/5] overflow-hidden bg-secondary/10">
                                         <Image
-                                            src={product.image}
+                                            src={product.image_url || product.image || "/img/logo.jpg"}
                                             alt={product.name}
                                             fill
                                             className="object-cover group-hover:scale-110 transition-transform duration-700"
                                         />
                                         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1 z-10">
-                                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" /> {product.rating}
+                                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" /> {product.rating || "5.0"}
                                         </div>
 
                                         {/* Overlay with Quick Action */}
@@ -126,12 +124,12 @@ export function BestSellers() {
                                         <div className="space-y-1">
                                             <div className="flex justify-between items-start gap-2">
                                                 <h3 className="font-serif font-bold text-xl text-foreground line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
-                                                <span className="font-bold text-lg text-primary whitespace-nowrap">S/ {product.price}</span>
+                                                <span className="font-bold text-lg text-primary whitespace-nowrap">S/ {Number(product.price).toFixed(2)}</span>
                                             </div>
                                             <div className="w-12 h-0.5 bg-gradient-to-r from-primary/50 to-transparent rounded-full" />
                                         </div>
                                         <p className="text-muted-foreground text-sm font-light line-clamp-2 leading-relaxed">
-                                            {product.desc}
+                                            {product.description || product.desc}
                                         </p>
                                     </CardContent>
 

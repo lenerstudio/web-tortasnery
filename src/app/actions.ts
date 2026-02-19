@@ -3,37 +3,37 @@
 import nodemailer from 'nodemailer'
 
 interface OrderData {
-    firstName: string
-    lastName: string
-    email: string
-    phone: string
-    date: string
-    time: string
-    address: string
-    notes?: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  date: string
+  time: string
+  address: string
+  notes?: string
 }
 
 interface OrderItem {
-    name: string
-    quantity: number
-    price: number
+  name: string
+  quantity: number
+  price: number
 }
 
 // Configuración del transporte de correo (SMTP)
 // Necesitas configurar GMAIL_USER y GMAIL_APP_PASSWORD en tu archivo .env.local
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_USER, // Tu correo de Gmail
-        pass: process.env.GMAIL_APP_PASSWORD, // Tu contraseña de aplicación (App Password)
-    },
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER, // Tu correo de Gmail
+    pass: process.env.GMAIL_APP_PASSWORD, // Tu contraseña de aplicación (App Password)
+  },
 })
 
 export async function sendOrderEmail(formData: OrderData, items: OrderItem[], total: number, orderId: string) {
-    const { firstName, lastName, email, phone, date, time, address, notes } = formData
+  const { firstName, lastName, email, phone, date, time, address, notes } = formData
 
-    // Contenido HTML del correo
-    const htmlContent = `
+  // Contenido HTML del correo
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -87,19 +87,34 @@ export async function sendOrderEmail(formData: OrderData, items: OrderItem[], to
     </html>
   `
 
-    try {
-        const mailOptions = {
-            from: '"Tortas Nery" <lenermatos128@gmail.com>', // Remitente
-            to: [email, 'lenermatos128@gmail.com'], // Enviar copia al cliente y al administrador
-            subject: `Confirmación de Pedido #${orderId} - Tortas Nery`,
-            html: htmlContent,
-        }
-
-        const info = await transporter.sendMail(mailOptions)
-        console.log("Email enviado: %s", info.messageId)
-        return { success: true, messageId: info.messageId }
-    } catch (error) {
-        console.error("Error al enviar email:", error)
-        return { success: false, error: 'Error al enviar el correo. Por favor verifica tus credenciales.' }
+  try {
+    const mailOptions = {
+      from: '"Tortas Nery" <lenermatos128@gmail.com>', // Remitente
+      to: [email, 'lenermatos128@gmail.com'], // Enviar copia al cliente y al administrador
+      subject: `Confirmación de Pedido #${orderId} - Tortas Nery`,
+      html: htmlContent,
     }
+
+    const info = await transporter.sendMail(mailOptions)
+    console.log("Email enviado: %s", info.messageId)
+    return { success: true, messageId: info.messageId }
+  } catch (error) {
+    console.error("Error al enviar email:", error)
+    return { success: false, error: 'Error al enviar el correo. Por favor verifica tus credenciales.' }
+  }
+}
+
+// Fetch featured products for the landing page
+export async function getFeaturedProducts() {
+  // Import query here to avoid circular dependencies if any, 
+  // but better to import at top if possible.
+  const { query } = await import("@/lib/db")
+
+  try {
+    const products = await query('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.is_featured = TRUE ORDER BY p.updated_at DESC LIMIT 6')
+    return { success: true, data: products }
+  } catch (error) {
+    console.error("fetch featured error:", error)
+    return { success: false, error: "Failed to fetch featured products" }
+  }
 }

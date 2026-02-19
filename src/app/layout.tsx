@@ -4,6 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { CartProvider } from '@/context/cart-context';
 import { WhatsAppButton } from '@/components/ui/whatsapp-button';
+import { Toaster } from 'sonner';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -39,6 +40,7 @@ export default function RootLayout({
       )}>
         <CartProvider>
           {children}
+          <Toaster position="top-right" richColors />
           <WhatsAppButton />
         </CartProvider>
       </body>
