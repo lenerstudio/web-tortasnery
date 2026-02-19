@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ArrowLeft, Upload, Loader2, Save } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 import { createProduct } from "../../actions"
@@ -17,6 +17,7 @@ export default function NewProductPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [preview, setPreview] = useState<string | null>(null)
+    const [categories, setCategories] = useState<{ id: number, name: string }[]>([])
     const [formData, setFormData] = useState({
         name: "",
         category: "",
@@ -24,6 +25,17 @@ export default function NewProductPage() {
         description: "",
         stock: "1"
     })
+
+    useEffect(() => {
+        const fetchCats = async () => {
+            const { getCategories } = await import("../../actions")
+            const res = await getCategories()
+            if (res.success) {
+                setCategories(res.data as { id: number, name: string }[])
+            }
+        }
+        fetchCats()
+    }, [])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -201,9 +213,9 @@ export default function NewProductPage() {
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 >
                                     <option value="" disabled>Selecciona una opción...</option>
-                                    <option value="bodas">Bodas</option>
-                                    <option value="xv-anos">XV Años</option>
-                                    <option value="especiales">Especiales</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id.toString()}>{cat.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </CardContent>

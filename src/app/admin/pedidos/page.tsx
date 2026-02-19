@@ -6,7 +6,10 @@ import { Search, Eye, AlertCircle, MessageCircle, Send } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { Loader2, RefreshCcw } from "lucide-react"
+import { Loader2, RefreshCcw, FileDown, FileSpreadsheet, FileText } from "lucide-react"
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import * as XLSX from 'xlsx'
 import { cn } from "@/lib/utils"
 import { getOrders, updateOrderStatus, getOrderById, getStoreSettings } from "../actions"
 
@@ -15,6 +18,8 @@ export default function OrdersPage() {
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 15
 
     // For Details Modal
     const [selectedOrder, setSelectedOrder] = useState<any>(null)
@@ -86,6 +91,16 @@ export default function OrdersPage() {
         return matchesSearch && matchesStatus
     })
 
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
+    const displayedOrders = filteredOrders.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    )
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [searchTerm, statusFilter])
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case "completed": return "bg-green-100 text-green-700 border-green-200"
@@ -148,6 +163,90 @@ export default function OrdersPage() {
                         <option value="completed">Completado</option>
                         <option value="cancelled">Cancelado</option>
                     </select>
+
+                    <div className="flex items-center gap-1 border-l border-gray-200 pl-2">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            title="Exportar PDF"
+                            onClick={() => {
+                                const doc = new jsPDF()
+                                doc.text("Reporte de Pedidos", 14, 15)
+                                const tableColumn = ["ID", "Cliente", "Fecha Evento", "Total", "Estado"]
+                                const tableRows = filteredOrders.map(order => [
+                                    order.order_number || order.id,
+                                    order.customer_name,
+                                    order.event_date ? new Date(order.event_date).toLocaleDateString('es-PE') : '-',
+                                    `S/ ${parseFloat(order.total_amount).toFixed(2)}`,
+                                    getStatusLabel(order.status)
+                                ])
+                                autoTable(doc, {
+                                    head: [tableColumn],
+                                    body: tableRows,
+                                    startY: 20,
+                                })
+                                doc.save("pedidos.pdf")
+                            }}
+                            className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                            <FileDown className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            title="Exportar Excel"
+                            onClick={() => {
+                                const worksheet = XLSX.utils.json_to_sheet(filteredOrders.map(order => ({
+                                    ID: order.order_number || order.id,
+                                    Cliente: order.customer_name,
+                                    Email: order.customer_email,
+                                    Telefono: order.customer_phone,
+                                    Fecha_Evento: order.event_date ? new Date(order.event_date).toLocaleDateString('es-PE') : '-',
+                                    Hora: order.event_time,
+                                    Total: parseFloat(order.total_amount).toFixed(2),
+                                    Estado: getStatusLabel(order.status),
+                                    Direccion: order.delivery_address
+                                })))
+                                const workbook = XLSX.utils.book_new()
+                                XLSX.utils.book_append_sheet(workbook, worksheet, "Pedidos")
+                                XLSX.writeFile(workbook, "pedidos.xlsx")
+                            }}
+                            className="h-9 w-9 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                            <FileSpreadsheet className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            title="Exportar CSV" // Added CSV button
+                            onClick={() => {
+                                const worksheet = XLSX.utils.json_to_sheet(filteredOrders.map(order => ({
+                                    ID: order.order_number || order.id,
+                                    Cliente: order.customer_name,
+                                    Email: order.customer_email,
+                                    Telefono: order.customer_phone,
+                                    Fecha_Evento: order.event_date ? new Date(order.event_date).toLocaleDateString('es-PE') : '-',
+                                    Hora: order.event_time,
+                                    Total: parseFloat(order.total_amount).toFixed(2),
+                                    Estado: getStatusLabel(order.status),
+                                    Direccion: order.delivery_address
+                                })))
+                                const csv = XLSX.utils.sheet_to_csv(worksheet)
+                                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+                                const link = document.createElement("a")
+                                const url = URL.createObjectURL(blob)
+                                link.setAttribute("href", url)
+                                link.setAttribute("download", "pedidos.csv")
+                                link.style.visibility = 'hidden'
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                            }}
+                            className="h-9 w-9 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                            <FileText className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="ml-auto text-sm text-gray-500">
@@ -179,7 +278,7 @@ export default function OrdersPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : filteredOrders.map((order) => (
+                            ) : displayedOrders.map((order) => (
                                 <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="px-6 py-4 font-mono font-medium text-gray-900">
                                         #{order.order_number || order.id}
@@ -230,6 +329,58 @@ export default function OrdersPage() {
                     <div className="text-center py-20">
                         <AlertCircle className="w-12 h-12 text-gray-200 mx-auto mb-4" />
                         <p className="text-gray-500">No se encontraron pedidos.</p>
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between p-4 border-t border-gray-100">
+                        <p className="text-sm text-gray-500">
+                            Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredOrders.length)} de {filteredOrders.length} pedidos
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                Anterior
+                            </Button>
+                            <div className="flex items-center gap-1">
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    let pageNum = i + 1;
+                                    if (totalPages > 5) {
+                                        if (currentPage > 3) {
+                                            pageNum = currentPage - 2 + i;
+                                        }
+                                        if (pageNum > totalPages) {
+                                            pageNum = totalPages - 4 + i;
+                                        }
+                                    }
+
+                                    return (
+                                        <Button
+                                            key={pageNum}
+                                            variant={currentPage === pageNum ? "default" : "outline"}
+                                            size="sm"
+                                            className="w-8 h-8 p-0"
+                                            onClick={() => setCurrentPage(pageNum)}
+                                        >
+                                            {pageNum}
+                                        </Button>
+                                    )
+                                })}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Siguiente
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>

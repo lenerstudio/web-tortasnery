@@ -21,11 +21,12 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { logout, getAdminSession } from "./actions"
+import { logout, getAdminSession, getPendingOrdersCount } from "./actions"
 
 const sidebarItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
+    { name: "Categorías", href: "/admin/categorias", icon: Menu },
     { name: "Productos", href: "/admin/productos", icon: Package },
     { name: "Usuarios", href: "/admin/usuarios", icon: Users },
     { name: "Configuración", href: "/admin/configuracion", icon: Settings },
@@ -40,6 +41,7 @@ export default function AdminLayout({
     const router = useRouter()
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [user, setUser] = useState<any>(null)
+    const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
 
     const isLoginPage = pathname === "/admin/login"
 
@@ -50,8 +52,19 @@ export default function AdminLayout({
                 if (session) setUser(session)
             }
             fetchUser()
+            fetchPendingOrders()
+            // Poll every minute
+            const interval = setInterval(fetchPendingOrders, 60000)
+            return () => clearInterval(interval)
         }
     }, [isLoginPage])
+
+    async function fetchPendingOrders() {
+        const res: any = await getPendingOrdersCount()
+        if (res?.success) {
+            setPendingOrdersCount(res.count)
+        }
+    }
 
     const handleLogout = async () => {
         await logout()
@@ -183,9 +196,12 @@ export default function AdminLayout({
                                 Ver Sitio
                             </Link>
                         </Button>
+
                         <Button variant="ghost" size="icon" className="relative text-gray-500 hover:text-primary">
                             <Bell className="w-5 h-5" />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white" />
+                            {pendingOrdersCount > 0 && (
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse" />
+                            )}
                         </Button>
                         <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
                             <div className="text-right hidden sm:block">

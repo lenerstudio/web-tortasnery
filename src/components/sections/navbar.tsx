@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Menu, ShoppingBag, User, LogOut, UserPlus, Loader2 } from "lucide-react"
+import { Menu, ShoppingCart, User, LogOut, UserPlus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
@@ -16,10 +16,11 @@ import { getAdminSession, logout, registerUser } from "@/app/admin/actions"
 import { toast } from "sonner"
 
 const navigation = [
-    { name: "Inicio", href: "/#hero" },
-    { name: "Bodas", href: "/#servicios" },
+    { name: "Inicio", href: "/" },
+    { name: "Servicios", href: "/#servicios" },
     { name: "Productos", href: "/productos" },
     { name: "Testimonios", href: "/#testimonios" },
+    { name: "Contacto", href: "/#contacto" },
 ]
 
 export function Navbar() {
@@ -27,10 +28,13 @@ export function Navbar() {
     const [isRegOpen, setIsRegOpen] = React.useState(false)
     const [user, setUser] = React.useState<any>(null)
     const [regLoading, setRegLoading] = React.useState(false)
+
+    const [mounted, setMounted] = React.useState(false)
     const { cartCount } = useCart()
     const router = useRouter()
 
     React.useEffect(() => {
+        setMounted(true)
         checkSession()
     }, [])
 
@@ -62,6 +66,19 @@ export function Navbar() {
         setRegLoading(false)
     }
 
+    if (!mounted) {
+        return (
+            <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur h-16">
+                <div className="container flex h-full items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+                        <div className="h-6 w-24 bg-muted animate-pulse rounded" />
+                    </div>
+                </div>
+            </nav>
+        )
+    }
+
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
@@ -90,7 +107,7 @@ export function Navbar() {
                     {/* Cart Icon */}
                     <Link href="/carrito" className="relative group">
                         <div className="p-2 rounded-full hover:bg-muted transition-colors">
-                            <ShoppingBag className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
+                            <ShoppingCart className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
                             <AnimatePresence>
                                 {cartCount > 0 && (
                                     <motion.span
@@ -180,7 +197,7 @@ export function Navbar() {
                 <div className="flex items-center gap-4 md:hidden">
                     {/* Mobile Cart */}
                     <Link href="/carrito" className="relative">
-                        <ShoppingBag className="w-6 h-6 text-foreground" />
+                        <ShoppingCart className="w-6 h-6 text-foreground" />
                         {cartCount > 0 && (
                             <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border border-background">
                                 {cartCount}

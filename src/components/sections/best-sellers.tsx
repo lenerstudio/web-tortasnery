@@ -41,8 +41,11 @@ export function BestSellers() {
     const [products, setProducts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [addedId, setAddedId] = useState<number | null>(null)
+    const [mounted, setMounted] = useState(false)
+
 
     useEffect(() => {
+        setMounted(true)
         async function loadData() {
             setLoading(true)
             const res: any = await getFeaturedProducts()
@@ -68,8 +71,12 @@ export function BestSellers() {
         setTimeout(() => setAddedId(null), 1500)
     }
 
+    if (!mounted) {
+        return <div className="py-16 md:py-24 bg-secondary/5 min-h-[400px]" />
+    }
+
     return (
-        <section className="py-16 md:py-24 bg-secondary/5 relative">
+        <section className="py-16 md:py-24 bg-secondary/5 relative" suppressHydrationWarning>
             <div className="container">
 
                 <div className="text-center mb-16 space-y-4">
@@ -113,9 +120,10 @@ export function BestSellers() {
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
                                             <Button
                                                 variant="outline"
-                                                className="bg-white/90 text-foreground border-none rounded-full px-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 font-medium"
+                                                asChild
+                                                className="bg-white/90 text-foreground border-none rounded-full px-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 font-medium hover:bg-white"
                                             >
-                                                Vista Rápida
+                                                <a href={`/productos/${product.slug || product.id}`}>Vista Rápida</a>
                                             </Button>
                                         </div>
                                     </CardHeader>

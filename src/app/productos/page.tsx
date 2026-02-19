@@ -10,20 +10,22 @@ import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useCart } from "@/context/cart-context"
 import { cn } from "@/lib/utils"
-
 import { getProducts } from "../admin/actions"
 import { useEffect } from "react"
+import Link from "next/link"
 
 const categories = ["Todos", "Bodas", "XV Años", "Especiales"]
 
 export default function ProductsPage() {
     const { addItem } = useCart()
+    const [mounted, setMounted] = useState(false)
     const [activeCategory, setActiveCategory] = useState("Todos")
     const [addedId, setAddedId] = useState<number | null>(null)
     const [products, setProducts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        setMounted(true)
         async function fetchProducts() {
             setLoading(true)
             const res: any = await getProducts()
@@ -36,7 +38,8 @@ export default function ProductsPage() {
                     price: parseFloat(p.price),
                     rating: parseFloat(p.rating) || 5.0,
                     image: p.image_url || "/img/logo.jpg",
-                    desc: p.description || ""
+                    desc: p.description || "",
+                    slug: p.slug
                 }))
                 setProducts(mappedProducts)
             }
@@ -44,6 +47,8 @@ export default function ProductsPage() {
         }
         fetchProducts()
     }, [])
+
+    if (!mounted) return <div className="min-h-screen bg-background" />;
 
     const filteredProducts = activeCategory === "Todos"
         ? products
@@ -115,7 +120,7 @@ export default function ProductsPage() {
                             {filteredProducts.map((product) => (
                                 <motion.div
                                     layout
-                                    key={product.id}
+                                    key={`prod-list-${product.id}`}
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
@@ -145,10 +150,11 @@ export default function ProductsPage() {
                                                 {/* Overlay with Quick Action */}
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
                                                     <Button
+                                                        asChild
                                                         variant="outline"
-                                                        className="bg-white/90 text-foreground border-none rounded-full px-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 font-medium"
+                                                        className="bg-white/90 text-foreground border-none rounded-full px-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 font-medium cursor-pointer"
                                                     >
-                                                        Ver Detalles
+                                                        <Link href={`/productos/${product.slug || product.id}`}>Ver Detalles</Link>
                                                     </Button>
                                                 </div>
                                             </CardHeader>
@@ -156,7 +162,9 @@ export default function ProductsPage() {
                                             <CardContent className="pt-6 px-6 flex-grow space-y-3">
                                                 <div className="space-y-1">
                                                     <div className="flex justify-between items-start gap-2">
-                                                        <h3 className="font-serif font-bold text-xl text-foreground line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+                                                        <Link href={`/productos/${product.slug || product.id}`} className="hover:underline decoration-primary underline-offset-4">
+                                                            <h3 className="font-serif font-bold text-xl text-foreground line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+                                                        </Link>
                                                         <span className="font-bold text-lg text-primary whitespace-nowrap">S/ {product.price}</span>
                                                     </div>
                                                     <div className="w-12 h-0.5 bg-gradient-to-r from-primary/50 to-transparent rounded-full" />

@@ -18,6 +18,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
     const [preview, setPreview] = useState<string | null>(null)
+    const [categories, setCategories] = useState<{ id: number, name: string }[]>([])
     const [formData, setFormData] = useState({
         name: "",
         category: "",
@@ -46,7 +47,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             }
             setFetching(false)
         }
+
+        async function loadCategories() {
+            const { getCategories } = await import("../../actions")
+            const res = await getCategories()
+            if (res.success) {
+                setCategories(res.data as { id: number, name: string }[])
+            }
+        }
+
         loadProduct()
+        loadCategories()
     }, [id, router])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -230,9 +241,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 >
                                     <option value="" disabled>Selecciona una opción...</option>
-                                    <option value="bodas">Bodas</option>
-                                    <option value="xv-anos">XV Años</option>
-                                    <option value="especiales">Especiales</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id.toString()}>{cat.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </CardContent>

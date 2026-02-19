@@ -9,7 +9,8 @@ import { SignJWT, jwtVerify } from "jose"
 import bcrypt from "bcryptjs"
 import { cookies } from "next/headers"
 
-const SECRET_KEY = Buffer.from(process.env.JWT_SECRET || "tortasnery_super_secret_key_123456789", "utf8")
+const JWT_SECRET_STR = process.env.JWT_SECRET || "tortasnery_super_secret_key_123456789";
+const SECRET_KEY = new TextEncoder().encode(JWT_SECRET_STR);
 
 // --- Database Setup ---
 
@@ -18,7 +19,7 @@ export async function checkDatabaseConnection() {
         await query('SELECT 1')
         return { success: true }
     } catch (error) {
-        return { success: false, error: "Database Connection Failed" }
+        return { success: false, error: "Error de conexión con la base de datos" }
     }
 }
 
@@ -64,6 +65,7 @@ export async function setupDatabase() {
             category_id INT,
             stock INT NOT NULL DEFAULT 0,
             image_url LONGTEXT,
+            slug VARCHAR(255) UNIQUE,
             is_active BOOLEAN DEFAULT TRUE,
             is_featured BOOLEAN DEFAULT FALSE,
             rating DECIMAL(2, 1) DEFAULT 5.0,
@@ -77,6 +79,44 @@ export async function setupDatabase() {
             await query(`ALTER TABLE products ADD COLUMN is_featured BOOLEAN DEFAULT FALSE`)
         } catch (e) {
             // Column probably exists, skip
+        }
+
+        // Add slug column if it doesn't exist (migration)
+        try {
+            // first check if column exists to accurate logging/logic, but simple ALTER IGNORE or catch is fine.
+            // Removing UNIQUE constraint here to ensure it can be added even if table has data (though NULLs usually fine)
+            // But just to be safe and ensure migration passes.
+            await query(`ALTER TABLE products ADD COLUMN slug VARCHAR(255)`)
+        } catch (e) {
+            // Maybe column exists, ignore
+        }
+
+        // Backfill slugs
+        try {
+            // Fetch all products to check/fix slugs (not just nulls, to ensure format)
+            // Actually, only fix nulls or empty to avoid changing existing valid slugs
+            // Fetch all products to ensure everyone has a slug
+            const allProducts: any[] = await query('SELECT id, name, slug FROM products')
+            for (const p of allProducts) {
+                // If slug is missing, empty, or numeric (ID based), generate a proper slug
+                if (!p.slug || p.slug === "" || !isNaN(Number(p.slug))) {
+                    let slug = p.name.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '') || `product-${p.id}`
+
+                    try {
+                        await query('UPDATE products SET slug = ? WHERE id = ?', [slug, p.id])
+                    } catch (e) {
+                        // If duplicate, append ID
+                        const newSlug = `${slug}-${p.id}`
+                        try {
+                            await query('UPDATE products SET slug = ? WHERE id = ?', [newSlug, p.id])
+                        } catch (ignore) { }
+                    }
+                }
+            }
+            revalidatePath('/')
+            revalidatePath('/productos')
+        } catch (e) {
+            console.log("Backfill slugs error", e)
         }
 
         // 4. Orders
@@ -214,8 +254,69 @@ export async function seedMockData() {
     }
 }
 
+// --- Categories ---
 
-// --- Products ---
+export async function getCategories() {
+    try {
+        const categories = await query('SELECT * FROM categories ORDER BY name ASC')
+        return { success: true, data: categories }
+    } catch (error) {
+        console.error("Error fetching categories:", error)
+        return { success: false, error: "Failed to fetch categories" }
+    }
+}
+
+export async function createCategory(formData: FormData) {
+    const name = formData.get("name") as string
+    const slug = (formData.get("slug") as string)?.toLowerCase() || name.toLowerCase().replace(/ /g, '-')
+
+    try {
+        await query('INSERT INTO categories (name, slug) VALUES (?, ?)', [name, slug])
+        revalidatePath('/admin/categorias')
+        revalidatePath('/productos')
+        return { success: true }
+    } catch (error: any) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return { success: false, error: "La categoría o el slug ya existen" }
+        }
+        return { success: false, error: "Error al crear la categoría" }
+    }
+}
+
+export async function updateCategory(id: number, formData: FormData) {
+    const name = formData.get("name") as string
+    const slug = (formData.get("slug") as string)?.toLowerCase() || name.toLowerCase().replace(/ /g, '-')
+
+    try {
+        await query('UPDATE categories SET name = ?, slug = ? WHERE id = ?', [name, slug, id])
+        revalidatePath('/admin/categorias')
+        revalidatePath('/productos')
+        return { success: true }
+    } catch (error: any) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return { success: false, error: "La categoría o el slug ya existen" }
+        }
+        return { success: false, error: "Error al actualizar la categoría" }
+    }
+}
+
+export async function deleteCategory(id: number) {
+    try {
+        // Check if there are products in this category
+        const products: any[] = await query('SELECT id FROM products WHERE category_id = ? LIMIT 1', [id])
+        if (products.length > 0) {
+            return { success: false, error: "No se puede eliminar una categoría que tiene productos asociados" }
+        }
+
+        await query('DELETE FROM categories WHERE id = ?', [id])
+        revalidatePath('/admin/categorias')
+        revalidatePath('/productos')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: "Error al eliminar la categoría" }
+    }
+}
+
 
 export async function getProducts() {
     try {
@@ -267,8 +368,22 @@ export async function createProduct(formData: FormData) {
             }
         }
 
-        const sql = `INSERT INTO products (name, description, price, stock, category_id, image_url) VALUES (?, ?, ?, ?, ?, ?)`
-        await query(sql, [name, description, price, stock, categoryId, imageUrl])
+        let slug = name.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '')
+        // Verify uniqueness is hard without query. Let's append timestamp to be safe or try/catch?
+        // Since we want clean URLs, let's just use timestamp for NEW products to avoid collision, 
+        // OR better: check if exists.
+        // For MVP, appending timestamp is safest to avoid "Duplicate entry" error crashing the app.
+        // User asked for "maqueta-premiun-blue".
+        // Let's try exact match, if fails, user has to retry or we handle it?
+        // Let's just append random suffix if we can't check.
+        // Actually, we can check.
+        const existingSlug: any[] = await query('SELECT id FROM products WHERE slug = ?', [slug])
+        if (existingSlug.length > 0) {
+            slug = `${slug}-${Date.now()}`
+        }
+
+        const sql = `INSERT INTO products (name, description, price, stock, category_id, image_url, slug) VALUES (?, ?, ?, ?, ?, ?, ?)`
+        await query(sql, [name, description, price, stock, categoryId, imageUrl, slug])
 
         revalidatePath('/admin/productos')
         revalidatePath('/productos')
@@ -278,14 +393,84 @@ export async function createProduct(formData: FormData) {
         return { success: false, error: "Failed to create product" }
     }
 }
+export async function importProducts(productsData: any[]) {
+    try {
+        for (const p of productsData) {
+            // Basic validation
+            if (!p.name || !p.price) continue
 
+            // Get Category ID by name or slug
+            let categoryId: number | null = null;
+            if (p.category) {
+                let cats: any[] = await query('SELECT id FROM categories WHERE name = ? OR slug = ?', [p.category, p.category.toLowerCase()])
+                if (cats.length > 0) categoryId = cats[0].id
+            }
+
+            let slug = p.name.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '')
+            // For import, we might have many. Let's append random if needed.
+            // But checking each is slow. Let's just append random to be safe for bulk import?
+            // Or try/catch? 
+            // Let's append a short random string to ensure uniqueness for bulk import unless we want perfect slugs.
+            // p.slug could be provided in excel? If not, generate.
+            // Attempt clean slug. If duplicate, DB error? Import should be robust.
+            // Let's just append random to avoid errors.
+            slug = `${slug}-${Math.floor(Math.random() * 10000)}`
+
+            const sql = `INSERT INTO products (name, description, price, stock, category_id, image_url, slug) VALUES (?, ?, ?, ?, ?, ?, ?)`
+            await query(sql, [
+                p.name,
+                p.description || "",
+                parseFloat(p.price),
+                parseInt(p.stock) || 0,
+                categoryId,
+                p.image_url || "/img/logo.jpg",
+                slug
+            ])
+        }
+
+        revalidatePath('/admin/productos')
+        revalidatePath('/productos')
+        return { success: true }
+    } catch (error) {
+        console.error("Import Error:", error)
+        return { success: false, error: "Error al importar productos" }
+    }
+}
 export async function getProductById(id: number) {
     try {
         const res: any[] = await query('SELECT * FROM products WHERE id = ?', [id])
         if (res.length > 0) return { success: true, data: res[0] }
         return { success: false, error: "Producto no encontrado" }
     } catch (error) {
-        return { success: false, error: "Failed to fetch product" }
+        return { success: false, error: "Error al obtener el producto" }
+    }
+}
+
+export async function getProductBySlug(slug: string) {
+    try {
+        // 1. Try ID lookup if it looks like an ID
+        // This is prioritized to handle cases where slug column might be missing or backfill failed
+        if (!isNaN(parseInt(slug))) {
+            try {
+                const resId: any[] = await query('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?', [parseInt(slug)])
+                if (resId.length > 0) {
+                    return { success: true, data: resId[0] }
+                }
+            } catch (idErr) {
+                // Ignore ID lookup error
+            }
+        }
+
+        // 2. Try Slug lookup
+        const res: any[] = await query('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ?', [slug])
+        if (res.length > 0) {
+            return { success: true, data: res[0] }
+        }
+
+        return { success: false, error: "Producto no encontrado" }
+    } catch (error) {
+        console.error("getProductBySlug Error:", error)
+        return { success: false, error: "Error al obtener el producto" }
     }
 }
 
@@ -322,6 +507,13 @@ export async function updateProduct(id: number, formData: FormData) {
             }
         }
 
+        // Update slug if name changes? For now, let's keep the slug stable or update it if we really want. 
+        // User asked for "productos/[nombre-producto]", meaning slug should ideally reflect name.
+        // But changing slug breaks old links. Let's just keep existing slug or update logic if needed. 
+        // For simplicity, I won't auto-update slug on name change to avoid broken links, unless we add a specific slug field in edit form.
+        // Since we don't have slug field in edit form (based on ProductsAdminPage), I'll leave it as is.
+        // Or I can update it if it is empty (which shouldn't happen with migration).
+
         const sql = `UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category_id = ?, image_url = ? WHERE id = ?`
         await query(sql, [name, description, price, stock, categoryId, imageUrl, id])
 
@@ -352,16 +544,17 @@ export async function toggleFeaturedProduct(id: number, featured: boolean) {
         return { success: true }
     } catch (error) {
         console.error("Toggle featured error:", error)
-        return { success: false, error: "Failed to toggle featured status" }
+        return { success: false, error: "Error al cambiar estado destacado" }
     }
 }
 
 export async function getFeaturedProducts() {
     try {
+        await setupDatabase() // Ensure migrations run
         const products = await query('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.is_featured = TRUE ORDER BY p.updated_at DESC')
         return { success: true, data: products }
     } catch (error) {
-        return { success: false, error: "Failed to fetch featured products" }
+        return { success: false, error: "Error al obtener productos destacados" }
     }
 }
 
@@ -372,7 +565,7 @@ export async function deleteProduct(id: number) {
         revalidatePath('/productos')
         return { success: true }
     } catch (error) {
-        return { success: false, error: "Failed to delete" }
+        return { success: false, error: "Error al eliminar" }
     }
 }
 
@@ -390,7 +583,7 @@ export async function getOrders() {
         return { success: true, data: serialized }
     } catch (error) {
         console.error("getOrders Error:", error)
-        return { success: false, error: "Failed to fetch orders" }
+        return { success: false, error: "Error al obtener órdenes" }
     }
 }
 
@@ -406,7 +599,7 @@ export async function getUserOrders(email: string) {
         return { success: true, data: serialized }
     } catch (error) {
         console.error("getUserOrders Error:", error)
-        return { success: false, error: "Failed to fetch user orders" }
+        return { success: false, error: "Error al obtener órdenes del usuario" }
     }
 }
 
@@ -432,7 +625,7 @@ export async function getOrderById(id: number) {
         return { success: true, data: serializedOrder }
     } catch (error) {
         console.error("getOrderById Error:", error)
-        return { success: false, error: "Failed to fetch order details" }
+        return { success: false, error: "Error al obtener detalles de la orden" }
     }
 }
 
@@ -443,7 +636,7 @@ export async function updateOrderStatus(id: number, status: string) {
         revalidatePath('/admin')
         return { success: true }
     } catch (error) {
-        return { success: false, error: "Failed to update order status" }
+        return { success: false, error: "Error al actualizar estado de la orden" }
     }
 }
 
@@ -495,7 +688,7 @@ export async function createFullOrder(orderData: any, items: any[], total: numbe
         return { success: true, dbOrderId }
     } catch (error) {
         console.error("Create Order Error:", error)
-        return { success: false, error: "Failed to create order in DB" }
+        return { success: false, error: "Error al crear la orden en BD" }
     }
 }
 
@@ -519,6 +712,16 @@ export async function getDashboardStats() {
     }
 }
 
+export async function getPendingOrdersCount() {
+    try {
+        const res: any[] = await query('SELECT COUNT(*) as count FROM orders WHERE status = "pending"')
+        return { success: true, count: Number(res[0]?.count) || 0 }
+    } catch (error) {
+        console.error("getPendingOrdersCount Error:", error)
+        return { success: false, error: "Error al obtener conteo de pendientes" }
+    }
+}
+
 export async function getRecentOrders(limit: number = 4) {
     try {
         const orders: any[] = await query(`SELECT * FROM orders ORDER BY created_at DESC LIMIT ${Number(limit)}`)
@@ -534,7 +737,7 @@ export async function getRecentOrders(limit: number = 4) {
         return { success: true, data: serializedOrders }
     } catch (error) {
         console.error("Error in getRecentOrders:", error)
-        return { success: false, error: "Failed to fetch recent orders" }
+        return { success: false, error: "Error al obtener órdenes recientes" }
     }
 }
 
@@ -624,7 +827,7 @@ export async function getUsers() {
         return { success: true, data: serialized }
     } catch (error) {
         console.error("getUsers Error:", error)
-        return { success: false, error: "Failed to fetch users" }
+        return { success: false, error: "Error al obtener usuarios" }
     }
 }
 
@@ -634,7 +837,7 @@ export async function deleteUser(id: number) {
         revalidatePath('/admin/usuarios')
         return { success: true }
     } catch (error) {
-        return { success: false, error: "Failed to delete user" }
+        return { success: false, error: "Error al eliminar usuario" }
     }
 }
 

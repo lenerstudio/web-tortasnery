@@ -18,6 +18,8 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
+
+
 export const metadata: Metadata = {
   title: 'Tortas Nery | Tortas de Boda y XV Años Premium',
   description: 'Tortas Nery: El centro de atención de tu celebración. Pastelería fina de autor, diseño exclusivo y sabores gourmet para bodas, quinceañeros y eventos exclusivos.',
@@ -32,8 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className="scroll-smooth">
-      <body className={cn(
+    <html lang="es" className="scroll-smooth" suppressHydrationWarning>
+      <body suppressHydrationWarning className={cn(
         "min-h-screen bg-background font-sans antialiased text-foreground selection:bg-primary selection:text-white",
         outfit.variable,
         playfair.variable
