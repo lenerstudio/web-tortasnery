@@ -250,7 +250,7 @@ export function Navbar() {
                                         href={item.href}
                                         className="text-lg font-medium hover:text-primary border-b border-border/50 pb-2"
                                         onClick={() => setIsOpen(false)}
-                                    >\
+                                    >
                                         {item.name}
                                     </Link>
                                 ))}

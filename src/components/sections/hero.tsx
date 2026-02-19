@@ -14,45 +14,15 @@ export function Hero() {
             {/* Animated Dynamic Background */}
             <div className="absolute inset-0 -z-20 overflow-hidden bg-background">
                 {/* Gradient Blobs Animation */}
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 180, 360],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="absolute -top-[20%] -right-[10%] w-[800px] h-[800px] bg-secondary/30 rounded-full blur-[120px] opacity-40 mix-blend-multiply"
+                {/* Elegant Background Image */}
+                <Image
+                    src="/img/maqueta-matrimonio-1.jpg"
+                    alt="Fondo Elegante"
+                    fill
+                    className="object-cover opacity-[0.15] scale-105 blur-[2px]"
+                    priority
                 />
-
-                <motion.div
-                    animate={{
-                        scale: [1, 1.5, 1],
-                        x: [0, -100, 0],
-                        y: [0, 50, 0],
-                    }}
-                    transition={{
-                        duration: 25,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                    className="absolute top-[20%] -left-[10%] w-[600px] h-[600px] bg-primary/20 rounded-full blur-[100px] opacity-30 mix-blend-multiply"
-                />
-
-                <motion.div
-                    animate={{
-                        opacity: [0.3, 0.6, 0.3],
-                        scale: [1, 1.1, 1],
-                    }}
-                    transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                    className="absolute bottom-[-20%] right-[20%] w-[700px] h-[700px] bg-accent/10 rounded-full blur-[150px] opacity-30"
-                />
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/40" />
 
                 {/* Texture Overlay */}
                 <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none" />
@@ -174,7 +144,7 @@ export function Hero() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 1.2, duration: 0.8 }}
-                        className="absolute bottom-20 -left-6 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/50 z-20"
+                        className="hidden md:block absolute bottom-20 -left-6 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/50 z-20"
                     >
                         <div className="flex items-center gap-3">
                             <div className="bg-green-100 p-2 rounded-full text-green-600 animate-pulse">

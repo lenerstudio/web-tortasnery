@@ -114,7 +114,7 @@ export default function ProductsPage() {
                 ) : (
                     <motion.div
                         layout
-                        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
+                        className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10"
                     >
                         <AnimatePresence mode="popLayout">
                             {filteredProducts.map((product) => (
@@ -131,7 +131,7 @@ export default function ProductsPage() {
                                         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
                                         <Card className="h-full border-0 bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col rounded-[2rem]">
-                                            <CardHeader className="p-0 relative aspect-[4/5] overflow-hidden bg-secondary/10">
+                                            <CardHeader className="p-0 relative aspect-square md:aspect-[4/5] overflow-hidden bg-secondary/10">
                                                 <Image
                                                     src={product.image}
                                                     alt={product.name}
@@ -159,25 +159,25 @@ export default function ProductsPage() {
                                                 </div>
                                             </CardHeader>
 
-                                            <CardContent className="pt-6 px-6 flex-grow space-y-3">
+                                            <CardContent className="p-3 md:pt-6 md:px-6 flex-grow space-y-2 md:space-y-3">
                                                 <div className="space-y-1">
-                                                    <div className="flex justify-between items-start gap-2">
+                                                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-1 md:gap-2">
                                                         <Link href={`/productos/${product.slug || product.id}`} className="hover:underline decoration-primary underline-offset-4">
-                                                            <h3 className="font-serif font-bold text-xl text-foreground line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+                                                            <h3 className="font-serif font-bold text-sm md:text-xl text-foreground line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
                                                         </Link>
-                                                        <span className="font-bold text-lg text-primary whitespace-nowrap">S/ {product.price}</span>
+                                                        <span className="font-bold text-sm md:text-lg text-primary whitespace-nowrap">S/ {product.price}</span>
                                                     </div>
-                                                    <div className="w-12 h-0.5 bg-gradient-to-r from-primary/50 to-transparent rounded-full" />
+                                                    <div className="w-8 md:w-12 h-0.5 bg-gradient-to-r from-primary/50 to-transparent rounded-full" />
                                                 </div>
-                                                <p className="text-muted-foreground text-sm font-light line-clamp-2 leading-relaxed">
+                                                <p className="text-muted-foreground text-xs md:text-sm font-light line-clamp-2 leading-relaxed hidden md:block">
                                                     {product.desc}
                                                 </p>
                                             </CardContent>
 
-                                            <CardFooter className="pb-6 px-6 pt-2">
+                                            <CardFooter className="p-3 md:pb-6 md:px-6 pt-0">
                                                 <Button
                                                     className={cn(
-                                                        "w-full transition-all duration-300 shadow-lg group-hover:shadow-primary/25",
+                                                        "w-full transition-all duration-300 shadow-lg group-hover:shadow-primary/25 h-8 text-xs md:h-10 md:text-sm",
                                                         addedId === product.id
                                                             ? "bg-green-600 hover:bg-green-700 text-white"
                                                             : "bg-foreground text-white hover:bg-primary"
