@@ -10,11 +10,11 @@ import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useCart } from "@/context/cart-context"
 import { cn } from "@/lib/utils"
-import { getProducts } from "../admin/actions"
+import { getProducts, getCategories } from "../admin/actions"
 import { useEffect } from "react"
 import Link from "next/link"
 
-const categories = ["Todos", "Bodas", "XV Años", "Especiales"]
+
 
 export default function ProductsPage() {
     const { addItem } = useCart()
@@ -22,16 +22,22 @@ export default function ProductsPage() {
     const [activeCategory, setActiveCategory] = useState("Todos")
     const [addedId, setAddedId] = useState<number | null>(null)
     const [products, setProducts] = useState<any[]>([])
+    const [categories, setCategories] = useState<string[]>(["Todos"])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         setMounted(true)
-        async function fetchProducts() {
+        async function fetchData() {
             setLoading(true)
-            const res: any = await getProducts()
-            if (res.success) {
+            // Fetch Products and Categories in parallel
+            const [prodRes, catRes] = await Promise.all([
+                getProducts() as Promise<any>,
+                getCategories() as Promise<any>
+            ])
+
+            if (prodRes.success) {
                 // Map DB snake_case to component camelCase or expected names
-                const mappedProducts = res.data.map((p: any) => ({
+                const mappedProducts = prodRes.data.map((p: any) => ({
                     id: p.id,
                     name: p.name,
                     category: p.category_name || "Otros",
@@ -43,9 +49,16 @@ export default function ProductsPage() {
                 }))
                 setProducts(mappedProducts)
             }
+
+            if (catRes.success) {
+                const dbCategories = catRes.data.map((c: any) => c.name)
+                // Filter duplicates if any and ensure 'Todos' is first
+                setCategories(["Todos", ...Array.from(new Set(dbCategories)) as string[]])
+            }
+
             setLoading(false)
         }
-        fetchProducts()
+        fetchData()
     }, [])
 
     if (!mounted) return <div className="min-h-screen bg-background" />;
