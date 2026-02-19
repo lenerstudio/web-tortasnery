@@ -104,6 +104,36 @@ export async function sendOrderEmail(formData: OrderData, items: OrderItem[], to
   }
 }
 
+
+export async function sendContactEmail(data: any) {
+  const { firstName, lastName, email, phone, date, type, message } = data
+
+  const htmlContent = `
+    <h1>Nueva Solicitud de Información</h1>
+    <p><strong>Cliente:</strong> ${firstName} ${lastName}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Teléfono:</strong> ${phone}</p>
+    <p><strong>Fecha del Evento:</strong> ${date}</p>
+    <p><strong>Tipo de Evento:</strong> ${type}</p>
+    <p><strong>Mensaje:</strong></p>
+    <p>${message}</p>
+  `
+
+  try {
+    await transporter.sendMail({
+      from: '"Web Tortas Nery" <lenermatos128@gmail.com>',
+      to: 'lenermatos128@gmail.com', // Admin
+      replyTo: email,
+      subject: `Nueva Consulta Web - ${firstName} ${lastName}`,
+      html: htmlContent,
+    })
+    return { success: true }
+  } catch (error) {
+    console.error("Error sending contact email:", error)
+    return { success: false, error: "Error al enviar el correo" }
+  }
+}
+
 // Fetch featured products for the landing page
 export async function getFeaturedProducts() {
   // Import query here to avoid circular dependencies if any, 
