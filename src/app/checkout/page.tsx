@@ -12,6 +12,7 @@ import { Navbar } from "@/components/sections/navbar"
 import { Footer } from "@/components/sections/footer"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { sendOrderEmail } from "@/app/actions"
 
 export default function CheckoutPage() {
     const { cartTotal, items, clearCart } = useCart()
@@ -33,6 +34,8 @@ export default function CheckoutPage() {
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
 
+    const [orderSnapshot, setOrderSnapshot] = useState<{ items: typeof items, total: number } | null>(null)
+
     const handleCheckout = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
@@ -41,45 +44,55 @@ export default function CheckoutPage() {
         const newOrderNumber = Math.floor(Math.random() * 900000) + 100000
         setOrderNumber(newOrderNumber.toString())
 
-        // Simulate API call (In a real app, this would send data to a backend)
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        // Snapshot cart for success screen
+        setOrderSnapshot({ items: [...items], total: cartTotal })
 
-        // Construct WhatsApp Message
-        const message = `Hola Tortas Nery, soy *${formData.firstName} ${formData.lastName}*.\n\nHe realizado el pedido *#${newOrderNumber}* por un total de *S/ ${cartTotal}*.\n\n*Detalles del Pedido:*\n${items.map(item => `- ${item.name} (x${item.quantity})`).join('\n')}\n\n*Fecha del Evento:* ${formData.date} a las ${formData.time}\n*Envío a:* ${formData.address}\n*Notas:* ${formData.notes || "Ninguna"}\n*Email:* ${formData.email}`
-
-        const encodedMessage = encodeURIComponent(message)
-        const whatsappUrl = `https://wa.me/34624432245?text=${encodedMessage}`
-
-        // Trigger Emails (Mock frontend logic - in production use a server action)
-        console.log(`Sending confirmation email to: ${formData.email} and lenermatos128@gmail.com`)
+        // Send Email (Server Action)
+        try {
+            await sendOrderEmail(formData, items, cartTotal, newOrderNumber.toString())
+        } catch (error) {
+            console.error("Error al enviar el email:", error)
+        }
 
         setLoading(false)
         setCompleted(true)
         clearCart()
-
-        // Open WhatsApp in a new tab after a brief delay to show success state
-        setTimeout(() => {
-            window.open(whatsappUrl, '_blank')
-        }, 1500)
     }
 
-    if (completed) {
+    if (completed && orderSnapshot) {
+        const message = `Hola Tortas Nery, soy *${formData.firstName} ${formData.lastName}*.\n\nHe realizado el pedido *#${orderNumber}* por un total de *S/ ${orderSnapshot.total}*.\n\n*Detalles del Pedido:*\n${orderSnapshot.items.map(item => `- ${item.name} (x${item.quantity})`).join('\n')}\n\n*Fecha del Evento:* ${formData.date} a las ${formData.time}\n*Envío a:* ${formData.address}\n*Notas:* ${formData.notes || "Ninguna"}\n*Email:* ${formData.email}`
+        const encodedMessage = encodeURIComponent(message)
+        const whatsappUrl = `https://wa.me/51997935991?text=${encodedMessage}`
+
         return (
             <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 text-center space-y-8 animate-fade-in-up">
-                <div className="bg-primary/20 p-6 rounded-full inline-block">
-                    <CheckCircle2 className="w-20 h-20 text-primary" />
+                <div className="bg-green-100 p-6 rounded-full inline-block animate-bounce">
+                    <CheckCircle2 className="w-20 h-20 text-green-600" />
                 </div>
-                <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground">¡Pedido Confirmado!</h1>
-                <p className="text-lg md:text-xl text-muted-foreground font-light max-w-xl mx-auto leading-relaxed">
-                    Gracias por elegirnos. Hemos generado tu orden y abierto WhatsApp para finalizar los detalles.
-                    <br /><span className="text-sm mt-2 block">Se ha enviado una copia a {formData.email}.</span>
-                </p>
-                <div className="bg-secondary/10 p-6 rounded-xl border border-secondary/20 max-w-sm mx-auto w-full">
-                    <p className="text-sm font-medium text-foreground uppercase tracking-widest mb-2">Número de Orden</p>
-                    <p className="text-3xl font-serif font-bold text-primary">#{orderNumber}</p>
+
+                <div className="space-y-4 max-w-lg mx-auto">
+                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground">¡Pedido Recibido!</h1>
+                    <p className="text-lg text-muted-foreground font-light leading-relaxed">
+                        Hemos enviado la confirmación a <strong>{formData.email}</strong>.
+                        <br />
+                        Para agilizar tu atención, por favor envíanos el detalle de tu pedido por WhatsApp.
+                    </p>
                 </div>
+
+                <div className="bg-secondary/5 p-6 rounded-2xl border border-secondary/20 max-w-sm mx-auto w-full mb-4">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Tu Número de Orden</p>
+                    <p className="text-4xl font-serif font-bold text-primary">#{orderNumber}</p>
+                </div>
+
                 <div className="flex flex-col gap-4 w-full max-w-xs mx-auto">
-                    <Button asChild className="bg-foreground text-white hover:bg-foreground/90 rounded-full px-10 py-6 text-lg shadow-xl shadow-foreground/20 transition-all">
+                    <Button asChild className="bg-[#25D366] hover:bg-[#128C7E] text-white hover:text-white rounded-full px-8 py-6 text-lg shadow-xl shadow-green-500/20 transition-all hover:-translate-y-1 group">
+                        <Link href={whatsappUrl} target="_blank">
+                            <MessageCircle className="w-6 h-6 mr-2 group-hover:scale-110 transition-transform" />
+                            Enviar a WhatsApp
+                        </Link>
+                    </Button>
+
+                    <Button asChild variant="ghost" className="text-muted-foreground hover:text-foreground">
                         <Link href="/">Volver al Inicio</Link>
                     </Button>
                 </div>
