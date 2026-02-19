@@ -3,8 +3,12 @@
 import { query } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { sendOrderEmail } from "@/app/actions"
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
+//import { writeFile, mkdir } from 'fs/promises'
+//import path from 'path'
+
+//############ VERCEL BLOB ############
+import { put } from '@vercel/blob';
+
 import { SignJWT, jwtVerify } from "jose"
 import bcrypt from "bcryptjs"
 import { cookies } from "next/headers"
@@ -185,7 +189,6 @@ export async function setupDatabase() {
     }
 }
 
-
 // --- Store Settings ---
 
 export async function getStoreSettings() {
@@ -341,6 +344,7 @@ export async function createProduct(formData: FormData) {
     let imageUrl = "/img/logo.jpg"
 
     try {
+        {/* 
         if (imageFile && imageFile.size > 0) {
             const bytes = await imageFile.arrayBuffer()
             const buffer = Buffer.from(bytes)
@@ -351,6 +355,23 @@ export async function createProduct(formData: FormData) {
             await writeFile(filepath, buffer)
             imageUrl = `/uploads/products/${filename}`
         }
+            */}
+
+        // --- CAMBIO AQUÍ: LÓGICA DE VERCEL BLOB ---
+        if (imageFile && imageFile.size > 0) {
+            // Generamos un nombre único
+
+            const filename = `/uploads/products/${Date.now()}-${imageFile.name.replaceAll(' ', '_')}`;
+
+            // Subimos directamente a la nube de Vercel
+            const blob = await put(filename, imageFile, {
+                access: 'public',
+            });
+
+            // blob.url es la dirección https://... que guardaremos en la DB
+            imageUrl = blob.url;
+        }
+        // --- FIN DEL CAMBIO ---
 
         // 1. Get Category ID
         let categoryId: number | null = null;
@@ -486,6 +507,7 @@ export async function updateProduct(id: number, formData: FormData) {
     let imageUrl = existingImageUrl || "/img/logo.jpg"
 
     try {
+        /*
         if (imageFile && imageFile.size > 0) {
             const bytes = await imageFile.arrayBuffer()
             const buffer = Buffer.from(bytes)
@@ -495,7 +517,23 @@ export async function updateProduct(id: number, formData: FormData) {
             const filepath = path.join(uploadDir, filename)
             await writeFile(filepath, buffer)
             imageUrl = `/uploads/products/${filename}`
+        }*/
+
+        // --- CAMBIO AQUÍ: LÓGICA DE VERCEL BLOB ---
+        if (imageFile && imageFile.size > 0) {
+            // Generamos un nombre único
+
+            const filename = `/uploads/products/${Date.now()}-${imageFile.name.replaceAll(' ', '_')}`;
+
+            // Subimos directamente a la nube de Vercel
+            const blob = await put(filename, imageFile, {
+                access: 'public',
+            });
+
+            // blob.url es la dirección https://... que guardaremos en la DB
+            imageUrl = blob.url;
         }
+        // --- FIN DEL CAMBIO ---
 
         let categoryId: number | null = null;
         if (categoryName) {
