@@ -26,7 +26,7 @@ export default function MyOrdersPage() {
             if (session) {
                 setUser(session)
                 const res = await getUserOrders(session.email as string)
-                if (res.success) {
+                if (res.success && res.data) {
                     setOrders(res.data)
                 }
             }

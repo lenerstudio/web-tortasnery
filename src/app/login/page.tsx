@@ -6,14 +6,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Loader2, ArrowLeft, Lock, Mail } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { login } from "@/app/admin/actions"
 import { toast } from "sonner"
 import { Navbar } from "@/components/sections/navbar"
 import { Footer } from "@/components/sections/footer"
 
-export default function LoginPage() {
+function LoginContent() {
     const [loading, setLoading] = useState(false)
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -108,5 +108,17 @@ export default function LoginPage() {
             </main>
             <Footer />
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <Loader2 className="w-10 h-10 animate-spin text-primary/40" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     )
 }

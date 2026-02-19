@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Plus, Search, Pencil, Trash2, Loader2, Star, StarOff } from "lucide-react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
+// @ts-ignore
 import { toast } from "sonner"
 
 import { getProducts, deleteProduct, toggleFeaturedProduct } from "../actions"

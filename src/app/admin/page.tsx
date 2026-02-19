@@ -1,13 +1,14 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, DollarSign, Package, ShoppingBag, Loader2, RefreshCcw } from "lucide-react"
-import { getDashboardStats, setupDatabase, getRecentOrders } from "./actions"
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, DollarSign, Package, ShoppingBag, Loader2, RefreshCcw } from "lucide-react";
+import { getDashboardStats, setupDatabase, getRecentOrders } from "./actions";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+// @ts-ignore
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
     const [statsData, setStatsData] = useState({
