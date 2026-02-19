@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/sections/navbar"
 import { Hero } from "@/components/sections/hero"
+import { BestSellers } from "@/components/sections/best-sellers"
 import { Authority } from "@/components/sections/authority"
 import { Audience } from "@/components/sections/audience"
 import { Problem } from "@/components/sections/problem"
@@ -15,6 +16,7 @@ export default function Home() {
     <main className="relative min-h-screen bg-background text-foreground font-sans">
       <Navbar />
       <Hero />
+      <BestSellers />
       <Authority />
       <Audience />
       <Problem />

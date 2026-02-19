@@ -26,8 +26,8 @@ export function Footer() {
                 <div className="space-y-6">
                     <h4 className="font-serif font-medium text-lg text-white">Contacto Privado</h4>
                     <ul className="space-y-3 text-sm font-light">
-                        <li><span className="opacity-50 block text-xs uppercase tracking-wider mb-1">Citas y Degustaciones</span>+51 999 999 999</li>
-                        <li><span className="opacity-50 block text-xs uppercase tracking-wider mb-1">Email Corporativo</span>contacto@tortasnery.com</li>
+                        <li><span className="opacity-50 block text-xs uppercase tracking-wider mb-1">Citas y Degustaciones</span><a href="tel:+51997935991">+51 997 935 991</a></li>
+                        <li><span className="opacity-50 block text-xs uppercase tracking-wider mb-1">Email Corporativo</span><a href="mailto:[lenermatos128@gmail.com]">lenermatos128@gmail.com</a></li>
                         <li><span className="opacity-50 block text-xs uppercase tracking-wider mb-1">Atelier</span>Av. Siempre Viva 123, Lima.</li>
                     </ul>
                 </div>

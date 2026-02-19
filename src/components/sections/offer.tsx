@@ -4,7 +4,7 @@ import { Check, ArrowRight } from "lucide-react"
 
 export function Offer() {
     return (
-        <section className="py-24 relative overflow-hidden bg-foreground"> {/* Using dark burgundy bg */}
+        <section className="py-16 md:py-20 relative overflow-hidden bg-foreground"> {/* Using dark burgundy bg */}
 
             {/* Dynamic Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-destructive/20 to-background opacity-50 mix-blend-overlay" />

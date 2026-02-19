@@ -20,7 +20,7 @@ export function CTA() {
     }
 
     return (
-        <section id="contacto" className="py-24 relative overflow-hidden bg-foreground text-white">
+        <section id="contacto" className="py-16 md:py-20 relative overflow-hidden bg-foreground text-white">
             {/* Background Image/Gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-foreground to-foreground -z-20" />
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] -z-10 translate-x-1/2 -translate-y-1/2" />
@@ -84,7 +84,7 @@ export function CTA() {
 
                         <div className="space-y-2">
                             <Label htmlFor="phone" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Teléfono</Label>
-                            <Input id="phone" type="tel" placeholder="+51 999 999 999" className="bg-muted/30 border-muted-foreground/20 focus:border-primary/50 h-12 rounded-xl" required />
+                            <Input id="phone" type="tel" placeholder="+51 997 935 991" className="bg-muted/30 border-muted-foreground/20 focus:border-primary/50 h-12 rounded-xl" required />
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">

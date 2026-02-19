@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Outfit, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
+import { CartProvider } from '@/context/cart-context';
+import { WhatsAppButton } from '@/components/ui/whatsapp-button';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -35,7 +37,10 @@ export default function RootLayout({
         outfit.variable,
         playfair.variable
       )}>
-        {children}
+        <CartProvider>
+          {children}
+          <WhatsAppButton />
+        </CartProvider>
       </body>
     </html>
   );
