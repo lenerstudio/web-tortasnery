@@ -80,7 +80,7 @@ export async function sendOrderEmail(formData: OrderData, items: OrderItem[], to
 
           <div class="footer">
             <p>Si tienes alguna pregunta, contáctanos por WhatsApp al <a href="https://wa.me/51997935991" style="color: #d4a373; text-decoration: none;">+51 997 935 991</a>.</p>
-            <p><strong>Tortas momcakespe</strong> - Arte Comestible</p>
+            <p><strong>Tortas Nery</strong> - Arte Comestible</p>
           </div>
         </div>
       </body>
@@ -89,9 +89,9 @@ export async function sendOrderEmail(formData: OrderData, items: OrderItem[], to
 
   try {
     const mailOptions = {
-      from: '"Tortas Momcakespe" <lenermatos128@gmail.com>', // Remitente
+      from: '"Tortas Nery" <lenermatos128@gmail.com>', // Remitente
       to: [email, 'lenermatos128@gmail.com'], // Enviar copia al cliente y al administrador
-      subject: `Confirmación de Pedido #${orderId} - Tortas Momcakespe`,
+      subject: `Confirmación de Pedido #${orderId} - Tortas Nery`,
       html: htmlContent,
     }
 
@@ -121,7 +121,7 @@ export async function sendContactEmail(data: any) {
 
   try {
     await transporter.sendMail({
-      from: '"Web Tortas Momcakespe" <lenermatos128@gmail.com>',
+      from: '"Web Tortas Nery" <lenermatos128@gmail.com>',
       to: 'lenermatos128@gmail.com', // Admin
       replyTo: email,
       subject: `Nueva Consulta Web - ${firstName} ${lastName}`,

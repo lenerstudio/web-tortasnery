@@ -7,7 +7,7 @@ export function Footer() {
             <div className="container grid md:grid-cols-4 gap-12 items-start">
 
                 <div className="space-y-6">
-                    <h3 className="font-serif text-3xl font-bold text-primary tracking-tighter">Tortas Momcakespe</h3>
+                    <h3 className="font-serif text-3xl font-bold text-primary tracking-tighter">Tortas Nery</h3>
                     <p className="text-sm font-light leading-relaxed max-w-xs text-white/60">
                         Arte comestible y pastelería de autor. Diseñando momentos dulces que perduran en la memoria.
                     </p>
@@ -49,7 +49,7 @@ export function Footer() {
 
             </div>
             <div className="container mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-xs text-white/40 font-light gap-4">
-                <span>© {new Date().getFullYear()} Tortas Momcakespe. Todos los derechos reservados. Design by LenerStudio</span>
+                <span>© {new Date().getFullYear()} Tortas Nery. Todos los derechos reservados. Design by LenerStudio</span>
                 <div className="flex gap-6">
                     <Link href="#" className="hover:text-white transition-colors">Política de Privacidad</Link>
                     <Link href="#" className="hover:text-white transition-colors">Términos y Condiciones</Link>

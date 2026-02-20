@@ -115,7 +115,7 @@ export default function CartPage() {
                             </Button>
 
                             <p className="text-[10px] text-center mt-6 text-white/40 uppercase tracking-widest relative z-10 flex justify-center gap-2 items-center">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Garantía Momcakespe
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Garantía Nery
                             </p>
                         </div>
                     </div>

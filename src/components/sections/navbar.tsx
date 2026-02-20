@@ -95,9 +95,9 @@ export function Navbar() {
                 {/* Logo */}
                 <Link href="/" className="group flex items-center space-x-3">
                     <div className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-primary/20 shadow-sm group-hover:border-primary transition-colors">
-                        <Image src={logoUrl} alt="Momcakespe Logo" fill className="object-cover" />
+                        <Image src={logoUrl} alt="Tostas Nery Logo" fill className="object-cover" />
                     </div>
-                    <span className="text-xl font-serif font-bold text-primary tracking-wide group-hover:text-primary transition-colors">Momcakespe</span>
+                    <span className="text-xl font-serif font-bold text-primary tracking-wide group-hover:text-primary transition-colors">Nery</span>
                 </Link>
 
                 {/* Desktop Navigation */}

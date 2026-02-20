@@ -55,7 +55,7 @@ export default function LoginPage() {
                     <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl mb-4 group hover:scale-105 transition-transform duration-300">
                         <Image src="/img/logo.jpg" alt="Logo" fill className="object-cover" />
                     </div>
-                    <h1 className="font-serif text-3xl font-bold text-gray-900 tracking-tight">Momcakespe</h1>
+                    <h1 className="font-serif text-3xl font-bold text-gray-900 tracking-tight">Nery</h1>
                     <p className="text-gray-500 font-light mt-1 uppercase tracking-[0.2em] text-xs font-bold">Panel Administrativo</p>
                 </div>
 
@@ -140,7 +140,7 @@ export default function LoginPage() {
                 </Card>
 
                 <p className="mt-8 text-center text-gray-400 text-sm font-light">
-                    &copy; {new Date().getFullYear()} Momcakespe. Todos los derechos reservados.
+                    &copy; {new Date().getFullYear()} Tortas Nery. Todos los derechos reservados.
                 </p>
             </motion.div>
         </div>

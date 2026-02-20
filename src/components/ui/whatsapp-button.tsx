@@ -40,7 +40,7 @@ export function WhatsAppButton() {
                     className="fixed bottom-6 right-6 z-50"
                 >
                     <Link
-                        href={`https://wa.me/${phone}?text=Hola%20Tortas%20Momcakespe,%20estoy%20interesada%20en%20una%20torta%20para%20mi%20boda/evento.`}
+                        href={`https://wa.me/${phone}?text=Hola%20Tortas%20Nery,%20estoy%20interesada%20en%20una%20torta%20para%20mi%20boda/evento.`}
                         target="_blank"
                         className="flex items-center justify-center w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg shadow-green-500/30 transition-all hover:scale-110 group relative"
                         aria-label="Contactar por WhatsApp"

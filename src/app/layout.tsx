@@ -21,8 +21,8 @@ const playfair = Playfair_Display({
 
 
 export const metadata: Metadata = {
-  title: 'Momcakespe | Tortas de Boda y XV Años Premium',
-  description: 'Momcakespe: El centro de atención de tu celebración. Pastelería fina de autor, diseño exclusivo y sabores gourmet para bodas, quinceañeros y eventos exclusivos.',
+  title: 'Nery | Tortas de Boda y XV Años Premium',
+  description: 'Nery: El centro de atención de tu celebración. Pastelería fina de autor, diseño exclusivo y sabores gourmet para bodas, quinceañeros y eventos exclusivos.',
   icons: {
     icon: '/img/logo.jpg',
   },

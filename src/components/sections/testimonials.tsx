@@ -18,7 +18,7 @@ export function Testimonials() {
         {
             name: "Ana Sofía",
             role: "Quinceañera",
-            text: "Momcakespe captó exactamente lo que quería. Mi fiesta de 15 tuvo el toque mágico gracias a su diseño floral. 100% recomendados.",
+            text: "Tortas Nery captó exactamente lo que quería. Mi fiesta de 15 tuvo el toque mágico gracias a su diseño floral. 100% recomendados.",
             rating: 5,
             image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=400",
             gradient: "from-accent/20 via-accent/5 to-transparent"

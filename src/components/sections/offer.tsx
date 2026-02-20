@@ -19,7 +19,7 @@ export function Offer() {
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.1]">
                         ¿Indecisa con los sabores? <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent italic font-light">
-                            Vive la Experiencia Momcakespe
+                            Vive la Experiencia Nery
                         </span>
                     </h2>
                     <p className="text-lg md:text-xl font-light opacity-80 leading-relaxed max-w-lg mx-auto lg:mx-0">

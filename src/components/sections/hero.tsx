@@ -23,7 +23,7 @@ export function Hero() {
                     className="absolute inset-[-5%]"
                 >
                     <Image
-                        src="/img/maqueta-matrimonio-1.jpg"
+                        src="/img/maqueta-matrimonio-5.jpg"
                         alt="Fondo Elegante"
                         fill
                         className="object-cover opacity-50"

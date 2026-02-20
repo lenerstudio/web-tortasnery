@@ -44,12 +44,12 @@ export async function setupDatabase() {
         )`)
 
         // Create default admin if none exists
-        const adminExists: any = await query('SELECT * FROM users WHERE email = ?', ['admin@mocakespe.com'])
+        const adminExists: any = await query('SELECT * FROM users WHERE email = ?', ['admin@tortasnery.com'])
         if (adminExists.length === 0) {
             const hashedPassword = await bcrypt.hash('admin123', 10)
             await query('INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, ?)',
-                ['Administrador', 'admin@mocakespe.com', hashedPassword, 'admin'])
-            console.log("Default admin created: admin@mocakespe.com / admin123")
+                ['Administrador', 'admin@tortasnery.com', hashedPassword, 'admin'])
+            console.log("Default admin created: admin@tortasnery.com / admin123")
         }
 
         // 2. Categories
