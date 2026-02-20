@@ -154,7 +154,7 @@ export function Hero() {
                 >
                     <div className="relative w-[90%] h-[130%] rounded-t-full rounded-b-[3rem] overflow-hidden shadow-2xl shadow-primary/10 border-[8px] border-pink z-10 group">
                         <Image
-                            src="/img/hero-torta.jpg"
+                            src="/img/hero.jpg"
                             alt="Torta de Boda Premium"
                             fill
                             className="object-cover group-hover:scale-105 transition-transform"
