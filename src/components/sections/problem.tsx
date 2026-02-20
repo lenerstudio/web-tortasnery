@@ -46,7 +46,7 @@ export function Problem() {
 
                         <div className="relative z-10 space-y-8">
                             <div className="inline-block px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-bold uppercase tracking-wider">
-                                Solución Tortas Nery
+                                Solución Momcakespe
                             </div>
 
                             <div className="space-y-4">
@@ -54,7 +54,7 @@ export function Problem() {
                                     Tu tranquilidad es <br /> nuestra prioridad
                                 </h3>
                                 <p className="text-white/70 font-light leading-relaxed">
-                                    En Tortas Nery, eliminamos la incertidumbre. Garantizamos no solo una escultura comestible, sino una experiencia gastronómica completa.
+                                    En Momcakespe, eliminamos la incertidumbre. Garantizamos no solo una escultura comestible, sino una experiencia gastronómica completa.
                                 </p>
                             </div>
 

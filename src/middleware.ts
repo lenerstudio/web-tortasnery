@@ -17,9 +17,11 @@ export async function middleware(request: NextRequest) {
         const token = request.cookies.get('admin_session')?.value
         if (token) {
             try {
-                await jwtVerify(token, SECRET_KEY)
-                // If valid token and on login, redirect to admin dashboard
-                return NextResponse.redirect(new URL('/admin', request.url))
+                const { payload } = await jwtVerify(token, SECRET_KEY)
+                if (payload.role === 'admin') {
+                    // If valid admin token and on login, redirect to admin dashboard
+                    return NextResponse.redirect(new URL('/admin', request.url))
+                }
             } catch (e) {
                 // Invalid token, stay on login
             }
@@ -35,10 +37,16 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-        await jwtVerify(token, SECRET_KEY)
+        const { payload } = await jwtVerify(token, SECRET_KEY)
+
+        // Check for admin role
+        if (payload.role !== 'admin') {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+
         return NextResponse.next()
     } catch (error) {
-        console.error("Middleware Auth Error:", error)
+        // Token verification failed (invalid or expired), redirect to login without noisy logs
         return NextResponse.redirect(new URL('/admin/login', request.url))
     }
 }

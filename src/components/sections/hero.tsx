@@ -9,23 +9,48 @@ export function Hero() {
     const ref = useRef(null)
 
     return (
-        <section id="hero" ref={ref} className="relative flex min-h-[auto] md:h-screen md:max-h-screen flex-col items-center justify-center overflow-hidden pt-24 pb-12 md:pt-0 md:pb-0">
+        <section id="hero" ref={ref} className="relative isolate flex min-h-[auto] md:h-screen md:max-h-screen flex-col items-center justify-center overflow-hidden pt-24 pb-12 md:pt-0 md:pb-0">
 
-            {/* Animated Dynamic Background */}
-            <div className="absolute inset-0 -z-20 overflow-hidden bg-background">
-                {/* Gradient Blobs Animation */}
-                {/* Elegant Background Image */}
-                <Image
-                    src="/img/maqueta-matrimonio-1.jpg"
-                    alt="Fondo Elegante"
-                    fill
-                    className="object-cover opacity-[0.15] scale-105 blur-[2px]"
-                    priority
+            {/* Animated Dynamic Background - z-0 so it's visible above parent bg */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+                {/* Base background color */}
+                <div className="absolute inset-0 bg-background" />
+
+                {/* Background Image with Ken Burns zoom */}
+                <motion.div
+                    animate={{ scale: [1, 1.12, 1] }}
+                    transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-[-5%]"
+                >
+                    <Image
+                        src="/img/maqueta-matrimonio-1.jpg"
+                        alt="Fondo Elegante"
+                        fill
+                        className="object-cover opacity-50"
+                        priority
+                    />
+                </motion.div>
+
+                {/* Animated Gradient Blobs - large and vibrant */}
+                <motion.div
+                    animate={{ x: [0, 40, -30, 0], y: [0, -50, 30, 0] }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-[15%] -right-[5%] w-[700px] h-[700px] rounded-full bg-primary/40 blur-[130px]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/40" />
+                <motion.div
+                    animate={{ x: [0, -40, 30, 0], y: [0, 40, -30, 0] }}
+                    transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -bottom-[15%] -left-[5%] w-[600px] h-[600px] rounded-full bg-accent/35 blur-[110px]"
+                />
+                <motion.div
+                    animate={{ x: [0, 25, -35, 0], y: [0, -25, 35, 0] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-[25%] left-[35%] w-[500px] h-[500px] rounded-full bg-secondary/50 blur-[90px]"
+                />
 
-                {/* Texture Overlay */}
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none" />
+                {/* Soft gradient overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background/75 via-background/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/50" />
             </div>
 
             <motion.div className="container flex flex-col lg:flex-row items-center gap-12 lg:gap-24 relative z-10">
@@ -103,7 +128,7 @@ export function Hero() {
                             {[1, 2, 3].map((i) => (
                                 <div key={i} className="h-12 w-12 rounded-full border-2 border-white bg-secondary overflow-hidden shadow-sm relative hover:z-10 hover:scale-110 transition-transform duration-300">
                                     <Image
-                                        src={`/img/${i === 1 ? '490091551_1194553782676549_7488877713644513055_n.jpg' : i === 2 ? '530409252_1296272965837963_1907930321176855560_n.jpg' : '541546709_18065612933195621_1113493324468824701_n.jpg'}`}
+                                        src={`/img/${i === 1 ? 'novia-1.avif' : i === 2 ? 'novia-2.avif' : 'novia-3.avif'}`}
                                         alt="Cliente feliz"
                                         fill
                                         className="object-cover"
@@ -115,7 +140,7 @@ export function Hero() {
                             <div className="flex text-accent drop-shadow-sm">
                                 {"★".repeat(5)}
                             </div>
-                            <p className="text-foreground/80 font-light">Elegido por <span className="font-semibold text-foreground">500+ novias</span></p>
+                            <p className="text-foreground/80 font-light">Elegido por <span className="font-semibold text-foreground">+500 novias</span></p>
                         </div>
                     </motion.div>
                 </div>
@@ -129,10 +154,11 @@ export function Hero() {
                 >
                     <div className="relative w-[90%] h-[130%] rounded-t-full rounded-b-[3rem] overflow-hidden shadow-2xl shadow-primary/10 border-[8px] border-pink z-10 group">
                         <Image
-                            src="/img/494697095_1212952257503368_3072608485761493813_n.jpg"
+                            src="/img/hero-torta.jpg"
                             alt="Torta de Boda Premium"
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
+                            className="object-cover group-hover:scale-105 transition-transform"
+                            style={{ transitionDuration: '2000ms' }}
                             priority
                         />
                         {/* Shine overlay */}

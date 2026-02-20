@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Loader2, Lock, Mail, AlertCircle, Eye, EyeOff } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function LoginPage() {
@@ -26,7 +27,11 @@ export default function LoginPage() {
         const res = await login(formData)
 
         if (res.success) {
-            router.push("/admin")
+            if (res.role === "admin") {
+                router.push("/admin")
+            } else {
+                router.push("/")
+            }
             router.refresh()
         } else {
             setError(res.error || "Error al iniciar sesión")
@@ -50,7 +55,7 @@ export default function LoginPage() {
                     <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl mb-4 group hover:scale-105 transition-transform duration-300">
                         <Image src="/img/logo.jpg" alt="Logo" fill className="object-cover" />
                     </div>
-                    <h1 className="font-serif text-3xl font-bold text-gray-900 tracking-tight">Tortas Nery</h1>
+                    <h1 className="font-serif text-3xl font-bold text-gray-900 tracking-tight">Momcakespe</h1>
                     <p className="text-gray-500 font-light mt-1 uppercase tracking-[0.2em] text-xs font-bold">Panel Administrativo</p>
                 </div>
 
@@ -85,7 +90,7 @@ export default function LoginPage() {
                                         id="email"
                                         name="email"
                                         type="email"
-                                        placeholder="admin@tortasnery.com"
+                                        placeholder="ejemplo@gmail.com"
                                         required
                                         className="pl-10 h-12 bg-gray-50/50 border-gray-200 rounded-xl focus:ring-primary focus:border-primary transition-all"
                                     />
@@ -126,12 +131,16 @@ export default function LoginPage() {
                                     "Iniciar Sesión"
                                 )}
                             </Button>
+
+                            <Link href="/" className="text-sm text-gray-500 hover:text-primary transition-colors text-center mt-2">
+                                Ir a Pagina Principal
+                            </Link>
                         </CardFooter>
                     </form>
                 </Card>
 
                 <p className="mt-8 text-center text-gray-400 text-sm font-light">
-                    &copy; {new Date().getFullYear()} Tortas Nery. Todos los derechos reservados.
+                    &copy; {new Date().getFullYear()} Momcakespe. Todos los derechos reservados.
                 </p>
             </motion.div>
         </div>

@@ -8,7 +8,7 @@ export function Offer() {
 
             {/* Dynamic Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-destructive/20 to-background opacity-50 mix-blend-overlay" />
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse duration-[5000ms]" />
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse" style={{ animationDuration: '5000ms' }} />
 
             <div className="container relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16">
 
@@ -19,7 +19,7 @@ export function Offer() {
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.1]">
                         ¿Indecisa con los sabores? <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent italic font-light">
-                            Vive la Experiencia Nery
+                            Vive la Experiencia Momcakespe
                         </span>
                     </h2>
                     <p className="text-lg md:text-xl font-light opacity-80 leading-relaxed max-w-lg mx-auto lg:mx-0">

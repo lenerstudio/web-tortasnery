@@ -44,12 +44,12 @@ export async function setupDatabase() {
         )`)
 
         // Create default admin if none exists
-        const adminExists: any = await query('SELECT * FROM users WHERE email = ?', ['admin@tortasnery.com'])
+        const adminExists: any = await query('SELECT * FROM users WHERE email = ?', ['admin@mocakespe.com'])
         if (adminExists.length === 0) {
             const hashedPassword = await bcrypt.hash('admin123', 10)
             await query('INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, ?)',
-                ['Administrador', 'admin@tortasnery.com', hashedPassword, 'admin'])
-            console.log("Default admin created: admin@tortasnery.com / admin123")
+                ['Administrador', 'admin@mocakespe.com', hashedPassword, 'admin'])
+            console.log("Default admin created: admin@mocakespe.com / admin123")
         }
 
         // 2. Categories
@@ -186,7 +186,7 @@ export async function setupDatabase() {
         // Initialize Settings if empty
         const settings = await query<any[]>('SELECT count(*) as count FROM store_settings')
         if (settings[0].count === 0) {
-            await query(`INSERT INTO store_settings (id, store_name, contact_email, contact_phone, address) VALUES (1, 'Tortas Nery', 'admin@tortasnery.com', '+51 997 935 991', 'Av. Ejemplo 123, Lima')`)
+            await query(`INSERT INTO store_settings (id, store_name, contact_email, contact_phone, address) VALUES (1, 'Moncakespe', 'admin@moncakespe.com', '+51 901231240', 'Av. Ejemplo 123, Lima')`)
         }
 
         return { success: true }
@@ -859,7 +859,7 @@ export async function login(formData: FormData) {
         // Update last login
         await query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id])
 
-        return { success: true }
+        return { success: true, role: user.role }
     } catch (error) {
         console.error("Login Error:", error)
         return { success: false, error: "Error en el servidor" }

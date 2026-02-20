@@ -112,7 +112,7 @@ export default function CheckoutPage() {
     }
 
     if (completed && orderSnapshot) {
-        const message = `Hola Tortas Nery, soy *${formData.firstName} ${formData.lastName}*.\n\nHe realizado el pedido *#${orderNumber}* por un total de *S/ ${orderSnapshot.total}*.\n\n*Detalles del Pedido:*\n${orderSnapshot.items.map(item => `- ${item.name} (x${item.quantity})`).join('\n')}\n\n*Fecha del Evento:* ${formData.date} a las ${formData.time}\n*Envío a:* ${formData.address}\n*Notas:* ${formData.notes || "Ninguna"}\n*Email:* ${formData.email}`
+        const message = `Hola Momcakespe, soy *${formData.firstName} ${formData.lastName}*.\n\nHe realizado el pedido *#${orderNumber}* por un total de *S/ ${orderSnapshot.total}*.\n\n*Detalles del Pedido:*\n${orderSnapshot.items.map(item => `- ${item.name} (x${item.quantity})`).join('\n')}\n\n*Fecha del Evento:* ${formData.date} a las ${formData.time}\n*Envío a:* ${formData.address}\n*Notas:* ${formData.notes || "Ninguna"}\n*Email:* ${formData.email}`
         const encodedMessage = encodeURIComponent(message)
         const whatsappUrl = `https://wa.me/${businessPhone}?text=${encodedMessage}`
 
