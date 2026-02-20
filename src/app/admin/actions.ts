@@ -165,8 +165,15 @@ export async function setupDatabase() {
             contact_email VARCHAR(255),
             contact_phone VARCHAR(50),
             address TEXT,
+            logo LONGTEXT,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )`)
+
+        // Start Migration: Add logo column
+        try {
+            await query("ALTER TABLE store_settings ADD COLUMN logo LONGTEXT")
+        } catch (e) { }
+        // End Migration
 
         // 6. Seeds (Check if exists first)
         const cats = await query<any[]>('SELECT count(*) as count FROM categories')
@@ -206,12 +213,39 @@ export async function updateStoreSettings(formData: FormData) {
     const contact_email = formData.get("contact_email") as string
     const contact_phone = formData.get("contact_phone") as string
     const address = formData.get("address") as string
+    const logoFile = formData.get("logo") as File | null
+
+    let logoUrl = null
+    if (logoFile && logoFile.size > 0) {
+        try {
+            const filename = `uploads/logo-${Date.now()}-${logoFile.name.replaceAll(' ', '_')}`
+            const blob = await put(filename, logoFile, { access: 'public' })
+            logoUrl = blob.url
+        } catch (error) {
+            console.error("Vercel Blob upload failed (check token), falling back to Base64 DB storage.", error)
+            const bytes = await logoFile.arrayBuffer()
+            const buffer = Buffer.from(bytes)
+            const mimeType = logoFile.type || 'image/jpeg'
+            const base64 = buffer.toString('base64')
+            logoUrl = `data:${mimeType};base64,${base64}`
+        }
+    }
 
     try {
-        await query(`INSERT INTO store_settings (id, store_name, contact_email, contact_phone, address) VALUES (1, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE store_name = ?, contact_email = ?, contact_phone = ?, address = ?`,
-            [store_name, contact_email, contact_phone, address, store_name, contact_email, contact_phone, address])
+        if (logoUrl) {
+            await query(`INSERT INTO store_settings (id, store_name, contact_email, contact_phone, address, logo) 
+                VALUES (1, ?, ?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE store_name = ?, contact_email = ?, contact_phone = ?, address = ?, logo = ?`,
+                [store_name, contact_email, contact_phone, address, logoUrl, store_name, contact_email, contact_phone, address, logoUrl])
+        } else {
+            await query(`INSERT INTO store_settings (id, store_name, contact_email, contact_phone, address) 
+                VALUES (1, ?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE store_name = ?, contact_email = ?, contact_phone = ?, address = ?`,
+                [store_name, contact_email, contact_phone, address, store_name, contact_email, contact_phone, address])
+        }
 
         revalidatePath('/admin/configuracion')
+        revalidatePath('/') // Update Landing Page
         return { success: true }
     } catch (error) {
         return { success: false, error: "Failed to update settings" }

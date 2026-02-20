@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import Image from "next/image"
 import { useCart } from "@/context/cart-context"
 import { motion, AnimatePresence } from "framer-motion"
-import { getAdminSession, logout, registerUser } from "@/app/admin/actions"
+import { getAdminSession, logout, registerUser, getStoreSettings } from "@/app/admin/actions"
 import { toast } from "sonner"
 
 const navigation = [
@@ -28,6 +28,7 @@ export function Navbar() {
     const [isRegOpen, setIsRegOpen] = React.useState(false)
     const [user, setUser] = React.useState<any>(null)
     const [regLoading, setRegLoading] = React.useState(false)
+    const [logoUrl, setLogoUrl] = React.useState("/img/logo.jpg")
 
     const [mounted, setMounted] = React.useState(false)
     const { cartCount } = useCart()
@@ -36,7 +37,15 @@ export function Navbar() {
     React.useEffect(() => {
         setMounted(true)
         checkSession()
+        loadLogo()
     }, [])
+
+    async function loadLogo() {
+        const res = await getStoreSettings()
+        if (res.success && res.data?.logo) {
+            setLogoUrl(res.data.logo)
+        }
+    }
 
     async function checkSession() {
         const session = await getAdminSession()
@@ -86,7 +95,7 @@ export function Navbar() {
                 {/* Logo */}
                 <Link href="/" className="group flex items-center space-x-3">
                     <div className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-primary/20 shadow-sm group-hover:border-primary transition-colors">
-                        <Image src="/img/logo.jpg" alt="Tortas Nery Logo" fill className="object-cover" />
+                        <Image src={logoUrl} alt="Tortas Nery Logo" fill className="object-cover" />
                     </div>
                     <span className="text-xl font-serif font-bold text-primary tracking-wide group-hover:text-primary transition-colors">Tortas Nery</span>
                 </Link>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Loader2, ArrowLeft, Lock, Mail } from "lucide-react"
+import { Loader2, ArrowLeft, Lock, Mail, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -15,6 +15,7 @@ import { Footer } from "@/components/sections/footer"
 
 function LoginContent() {
     const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const router = useRouter()
     const searchParams = useSearchParams()
     const redirectTo = searchParams.get("redirect") || "/"
@@ -79,11 +80,19 @@ function LoginContent() {
                                     <Input
                                         id="password"
                                         name="password"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="••••••••"
                                         required
-                                        className="h-12 pl-11 bg-secondary/5 border-secondary/20 rounded-xl focus:border-primary/50 transition-all"
+                                        className="h-12 pl-11 pr-10 bg-secondary/5 border-secondary/20 rounded-xl focus:border-primary/50 transition-all"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                                        tabIndex={-1}
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
                                 </div>
                             </div>
                             <Button

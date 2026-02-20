@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { logout, getAdminSession, getPendingOrdersCount } from "./actions"
+import { logout, getAdminSession, getPendingOrdersCount, getStoreSettings } from "./actions"
 
 const sidebarItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -42,6 +42,7 @@ export default function AdminLayout({
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [user, setUser] = useState<any>(null)
     const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
+    const [logoUrl, setLogoUrl] = useState("/img/logo.jpg")
 
     const isLoginPage = pathname === "/admin/login"
 
@@ -50,6 +51,10 @@ export default function AdminLayout({
             async function fetchUser() {
                 const session = await getAdminSession()
                 if (session) setUser(session)
+                const settings = await getStoreSettings()
+                if (settings.success && settings.data?.logo) {
+                    setLogoUrl(settings.data.logo)
+                }
             }
             fetchUser()
             fetchPendingOrders()
@@ -83,7 +88,7 @@ export default function AdminLayout({
             <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
                 <div className="p-6 border-b border-gray-100 flex items-center gap-3">
                     <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-                        <Image src="/img/logo.jpg" alt="Logo" fill className="object-cover" />
+                        <Image src={logoUrl} alt="Logo" fill className="object-cover" />
                     </div>
                     <span className="font-serif font-bold text-lg text-gray-900">Admin Panel</span>
                 </div>
@@ -125,7 +130,7 @@ export default function AdminLayout({
             <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-2">
                     <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-                        <Image src="/img/logo.jpg" alt="Logo" fill className="object-cover" />
+                        <Image src={logoUrl} alt="Logo" fill className="object-cover" />
                     </div>
                     <span className="font-serif font-bold text-lg text-gray-900">Admin</span>
                 </div>

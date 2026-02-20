@@ -17,6 +17,8 @@ export default function SettingsPage() {
         contact_phone: "",
         address: ""
     })
+    const [logoFile, setLogoFile] = useState<File | null>(null)
+    const [logoPreview, setLogoPreview] = useState("")
 
     useEffect(() => {
         loadSettings()
@@ -31,6 +33,7 @@ export default function SettingsPage() {
                 contact_phone: res.data.contact_phone || "",
                 address: res.data.address || ""
             })
+            if (res.data.logo) setLogoPreview(res.data.logo)
         }
     }
 
@@ -40,6 +43,7 @@ export default function SettingsPage() {
 
         const data = new FormData()
         Object.entries(formData).forEach(([key, value]) => data.append(key, value))
+        if (logoFile) data.append("logo", logoFile)
 
         const res = await updateStoreSettings(data)
         if (res.success) {
@@ -117,6 +121,28 @@ export default function SettingsPage() {
                                         value={formData.address}
                                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                     />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label htmlFor="logo">Logo de la Tienda</Label>
+                                    <div className="flex items-center gap-4">
+                                        {logoPreview && (
+                                            <div className="relative w-16 h-16 rounded-full overflow-hidden border border-gray-200">
+                                                <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        <Input
+                                            id="logo"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                if (file) {
+                                                    setLogoFile(file)
+                                                    setLogoPreview(URL.createObjectURL(file))
+                                                }
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="pt-4 flex justify-end">
